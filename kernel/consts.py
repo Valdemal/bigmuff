@@ -1,3 +1,5 @@
+from kernel.enums import MemberFuncType
+
 EPSILON = 1E-3
 DELTA_AMOUNT = 0.1                  # Степень нечеткости при фаззификации в % / 100
 CRISP_AMOUNT = 0.02                  # Степень абсолютной принадлежности при фаззификации в % / 100
@@ -19,3 +21,12 @@ StdLingNames = [
 Membership = float  # Тип значений степени принадлежности
 BaseSet = float     # Тип значений базового множества
 Natural = int       # Беззнаковый тип индекса и размера массивов
+
+# Имена типов функций принадлежности для FCL
+MemberFuncTypeName = {
+    MemberFuncType.mfNA: "NA",
+    MemberFuncType.mfSingleton: "SINGLETON",
+    MemberFuncType.mfLinear: "LINEAR",
+    MemberFuncType.mfSmooth: "SMOOTH",
+    MemberFuncType.mfLnVector: "VECTOR"
+}

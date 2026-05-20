@@ -2,12 +2,10 @@ import sys
 from abc import ABC, abstractmethod
 from typing import List
 
-from kernel.consts import BaseSet, Membership, Natural
+from kernel.consts import BaseSet, Membership, Natural, MemberFuncTypeName
 from kernel.enums import MemberFuncType
 from kernel.exceptions import EMemberFunc, NFE_INVALID_BASE, NFE_INVALID_INDEX, NFE_OUT_OF_DOMAIN
-from kernel.member_func import MemberFuncTypeName
 from kernel.base import TNeuroFuzzyBase, LS, GE, INRANGE, GT, EQ, ZR
-from kernel.node_value import TNodeValue
 
 
 class TMemberFunc(TNeuroFuzzyBase, ABC):
@@ -31,7 +29,7 @@ class TMemberFunc(TNeuroFuzzyBase, ABC):
         self._inf_base = a_inf
         self._sup_base = a_sup
         self._type = MemberFuncType.mfNA
-        self._node: List[TNodeValue] = []
+        self._node: List['TNodeValue'] = []
         self._data: List[Membership] = []
 
     def __copy__(self) -> 'TMemberFunc':
@@ -120,7 +118,7 @@ class TMemberFunc(TNeuroFuzzyBase, ABC):
         """Размер вектора данных"""
         return len(self._data)
 
-    def node(self, index: Natural) -> TNodeValue:
+    def node(self, index: Natural) -> 'TNodeValue':
         """
         Получить опорную точку по индексу
 
@@ -135,7 +133,7 @@ class TMemberFunc(TNeuroFuzzyBase, ABC):
         else:
             raise EMemberFunc("", NFE_INVALID_INDEX)
 
-    def __getitem__(self, index: Natural)-> Membership:
+    def __getitem__(self, index: Natural) -> Membership:
         return self._data[index]
 
     def __setitem__(self, key, value):
@@ -171,7 +169,7 @@ class TMemberFunc(TNeuroFuzzyBase, ABC):
         else:
             raise EMemberFunc("", NFE_OUT_OF_DOMAIN)
 
-    def add_node(self, value: TNodeValue):
+    def add_node(self, value: 'TNodeValue'):
         """
         Добавить опорную точку с упорядочиванием
 
@@ -196,7 +194,7 @@ class TMemberFunc(TNeuroFuzzyBase, ABC):
         else:
             raise EMemberFunc("", NFE_OUT_OF_DOMAIN)
 
-    def append_node(self, value: TNodeValue):
+    def append_node(self, value: 'TNodeValue'):
         """
         Добавить точку без переупорядочивания
 

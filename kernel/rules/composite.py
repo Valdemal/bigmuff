@@ -6,7 +6,8 @@ from kernel.enums import OperationCode
 from kernel.exceptions import ECompositeRule, NFE_INVALID_CERT_VALUE, NFE_INVALID_EXPRESSION, ESimpleRule, \
     NFE_INVALID_INDEX, NFE_VAR_USED, NFE_INVALID_INPUTS
 from kernel.fuzzy_set import TFuzzySet
-from kernel.base import TNeuroFuzzyBase, RESULT_FUNC
+from kernel.base import TNeuroFuzzyBase
+from kernel.member_func import RESULT_FUNC
 from kernel.operation import TOperationBase
 from kernel.rules.simple import TSimpleRule
 from kernel.variables.custom import TCustomVariable

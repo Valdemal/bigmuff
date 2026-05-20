@@ -5,7 +5,6 @@
 from typing import Optional
 
 from kernel.consts import EPSILON
-from kernel.member_func.vector import TMemberFuncLnVect
 
 
 # Константы для сравнения чисел с плавающей точкой
@@ -70,5 +69,3 @@ class TNeuroFuzzyBase:
     def owner(self, value: Optional['TNeuroFuzzyBase']):
         """Установить владельца объекта"""
         self._owner = value
-
-RESULT_FUNC = TMemberFuncLnVect

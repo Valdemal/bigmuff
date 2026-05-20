@@ -8,11 +8,8 @@ from typing import Optional, Union, Any
 from kernel.consts import DELTA_AMOUNT, CRISP_AMOUNT
 from kernel.enums import DefuzzifyMethod, FuzzifyMethod
 from kernel.exceptions import EFuzzySet, NFE_INVALID_BASE_SET
-from kernel.member_func.base import TMemberFunc
-from kernel.member_func.linear import TMemberFuncLinear
-from kernel.member_func.singleton import TMemberFuncSingle
-from kernel.member_func.smooth import TMemberFuncSmooth
-from kernel.base import RESULT_FUNC, TNeuroFuzzyBase, MAX, MIN
+from kernel.base import TNeuroFuzzyBase, MAX, MIN
+from kernel.member_func import TMemberFunc, RESULT_FUNC, TMemberFuncLinear, TMemberFuncSingle, TMemberFuncSmooth
 from kernel.operation import TOperationBase, TMaxMin
 
 

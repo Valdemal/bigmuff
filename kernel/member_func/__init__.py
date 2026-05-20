@@ -1,10 +1,7 @@
-from kernel.base import MemberFuncType
+from .base import TMemberFunc
+from .linear import TMemberFuncLinear
+from .singleton import TMemberFuncSingle
+from .smooth import TMemberFuncSmooth
+from .vector import TMemberFuncLnVect
 
-# Имена типов функций принадлежности для FCL
-MemberFuncTypeName = {
-    MemberFuncType.mfNA: "NA",
-    MemberFuncType.mfSingleton: "SINGLETON",
-    MemberFuncType.mfLinear: "LINEAR",
-    MemberFuncType.mfSmooth: "SMOOTH",
-    MemberFuncType.mfLnVector: "VECTOR"
-}
+RESULT_FUNC = TMemberFuncLnVect

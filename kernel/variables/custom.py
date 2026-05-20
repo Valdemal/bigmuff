@@ -48,12 +48,10 @@ class TCustomVariable(TNeuroFuzzyBase, ABC):
     def value(self, revform: List[int]) -> Optional[TFuzzySet]:
         pass
 
-    @abstractmethod
     @property
     def ops(self) -> Optional[TOperationBase]:
         pass
 
-    @abstractmethod
     @ops.setter
     def ops(self, value: TOperationBase):
         pass

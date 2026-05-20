@@ -4,7 +4,8 @@ from kernel.consts import Natural
 from kernel.enums import OperationCode
 from kernel.exceptions import ESimpleRule, NFE_INVALID_CERT_VALUE, NFE_INVALID_BASE
 from kernel.fuzzy_set import TFuzzySet
-from kernel.base import TNeuroFuzzyBase, RESULT_FUNC, LE
+from kernel.base import TNeuroFuzzyBase, LE
+from kernel.member_func import RESULT_FUNC
 from kernel.operation import TOperationBase
 from kernel.variables.custom import TCustomVariable
 
