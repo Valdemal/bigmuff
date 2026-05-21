@@ -3,14 +3,14 @@ from typing import TextIO
 
 from fcl.enums import FCLRules, FCLTokens, FCL_TOKENS_COUNT
 from fcl.matrix import MATRIX
+from fcl.parser import FCLProgram
 from fcl.structs import FCLElement, FCLMatrixSymbol
 from kernel.block.function import TFunctionBlock
 from kernel.exceptions import FCL_DONE
 
-FCLProgram = deque[FCLElement]
+
 
 class Translator:
-    # todo разделить парсер и транслятор
     def __init__(self):
         self._stack = [
             FCLRules.emptystack, FCLRules.fb,
@@ -63,76 +63,3 @@ class Translator:
 
             flag = current_token != FCLTokens.endfcl and self._error_state == 0
 
-    def _fcl_text_to_tokens(self, filename: str, input_stream: TextIO, tok: FCLProgram):
-        # todo доделать позже
-        tok.clear()
-        strn = 0
-
-        while True:
-            strn += 1
-            line = input_stream.readline()
-
-            if not line:
-                break
-
-            strn += 1
-            # Удаляем перевод строки в конце
-            line = line.rstrip('\n\r')
-            length = len(line)
-
-            # Сохраняем оригинальную строку и её версию в верхнем регистре
-            str_original = line
-            str_upper = line.upper()
-
-            beg = 0
-
-            while beg < length:
-                value = ""
-
-                while beg < length and (line[beg] == ' ' or line[beg] == '\t' or line[beg] == '\r'):
-                    beg += 1
-
-                end = beg
-
-                if beg >= length:
-                    continue
-
-                i = 0
-                for i in range(FCL_TOKENS_COUNT):
-                    pass
-
-                if i == FCLTokens.str_comment:
-                    break
-
-                if i == FCLTokens.begin_comment:
-                    str_beg = strn
-
-
-
-                # i = FCLTokensCount
-
-                # for idx, token in enumerate(FCLSTokens):
-                #     if str_upper[beg:beg+len(token)] == token and str_upper.startswith(token, beg):
-                #         end = beg + len(token)
-                #
-                #         # Парные кавычки обрабатываются отдельно
-                #         if assign <= idx <= apostrophe:  # предполагаем, что assign/apostrophe определены
-                #             i = idx
-                #             break
-                #
-                #         # Проверка разделителей
-                #         if end < length and line[end] in " ():;,=+-/*\\\"'.\r":
-                #             i = idx
-                #             break
-                #
-                #         # Комментарии не требуют разделителя
-                #         if idx in (str_comment, begin_comment, end_comment):
-                #             i = idx
-                #             break
-
-    def translate_file(self, filename: str) -> TFunctionBlock:
-        tok: FCLProgram = FCLProgram()
-        with open(filename, 'r') as f:
-            self._fcl_text_to_tokens(filename, f, tok)
-            self.translate(tok)
-            return self._func_block

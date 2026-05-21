@@ -6,7 +6,7 @@ FCL_TOKEN_COLS_COUNT: Final[int] = 78
 
 class FCLTokens(Enum):
     # Зарезервированные слова IEC 1131-7
-    kdlogic = auto()
+    kdlogic = 0
     z2logic = auto()
     and_tok = auto()
     z3logic = auto()
