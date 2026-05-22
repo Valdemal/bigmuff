@@ -1,235 +1,135 @@
+from fcl.enums import FCLRules
 from fcl.translator.actions import *
 
-NOTHING = 0, None, False, False, None, -1
-NEXT = 0, None, True, True, None, -1
-
-ERR_TOC = 0, None, False, False, fcl_tok_exp, -1
-
-ERR_IDT = 0, None, False, False, fcl_idt_exp, -1
-
-ERR_NUM = 0, None, False, False, fcl_num_exp, -1
-
-ERR_STR = 0, None, False, False, fcl_str_exp, -1
-
-ERR_EOF = 0, None, False, False, fcl_eof_exp, -1
-
-FC_ERR = 0, None, False, False, fcl_err_tok, -1
-
-FC_DONE = 0, None, False, False, fcl_parse_done, -1
-
-FB = 4, (FCLTokens.identifier, FCLRules.c_fb, FCLRules.fb1, FCLTokens.end_function_block), True, True, None, -1
-
-C_FB = 0, None, True, False, create_function_block, -1
-
-FB1_1 = 0, None, True, False, None, -1
-FB1_2 = 2, (FCLRules.iv, FCLRules.fb1), True, False, None, -1
-FB1_3 = 2, (FCLRules.ov, FCLRules.fb1), True, False, None, -1
-FB1_4 = 2, (FCLRules.fzb, FCLRules.fb1), True, False, None, -1
-FB1_5 = 2, (FCLRules.dfb, FCLRules.fb1), True, False, None, -1
-FB1_6 = 2, (FCLRules.rb, FCLRules.fb1), True, False, None, -1
-
-IV = 3, (FCLTokens.var_input, FCLRules.vd, FCLTokens.end_var), True, False, set_var_type, -1
-OV = 3, (FCLTokens.var_output, FCLRules.vd, FCLTokens.end_var), True, False, set_var_type, -1
-
-VD_1 = 0, None, True, False, None, -1
-VD_2 = (
-    6, (FCLTokens.identifier, FCLTokens.colon, FCLRules.vt, FCLTokens.semicolon, FCLRules.c_var, FCLRules.vd), True,
-    False,
-    None, -1)
-
-C_VAR = 0, None, True, False, create_variable, -1
-VT = 0, None, True, True, set_value_type, -1
-
-IDENTIF = 0, None, True, True, identifier_token, -1
-
-STRINGL = 0, None, True, True, string_token, -1
-
-NUMBERL = 0, None, True, True, numeric_token, -1
-
-ENDFNCB = 0, None, True, True, end_function_block, -1
-
-FZB = 8, (
+NOTHING = False, False,
+NEXT = True, True,
+ERR_TOC = False, False, fcl_tok_exp
+ERR_IDT = False, False, fcl_idt_exp
+ERR_NUM = False, False, fcl_num_exp
+ERR_STR = False, False, fcl_str_exp
+ERR_EOF = False, False, fcl_eof_exp
+FC_ERR = False, False, fcl_err_tok
+FC_DONE = False, False, fcl_parse_done
+FB = True, True, None, (FCLTokens.identifier, FCLRules.c_fb, FCLRules.fb1, FCLTokens.end_function_block)
+C_FB = True, False, create_function_block
+FB1_1 = True, False,
+FB1_2 = True, False, None, (FCLRules.iv, FCLRules.fb1)
+FB1_3 = True, False, None, (FCLRules.ov, FCLRules.fb1)
+FB1_4 = True, False, None, (FCLRules.fzb, FCLRules.fb1)
+FB1_5 = True, False, None, (FCLRules.dfb, FCLRules.fb1)
+FB1_6 = True, False, None, (FCLRules.rb, FCLRules.fb1)
+IV = True, False, set_var_type, (FCLTokens.var_input, FCLRules.vd, FCLTokens.end_var)
+OV = True, False, set_var_type, (FCLTokens.var_output, FCLRules.vd, FCLTokens.end_var)
+VD_1 = True, False,
+VD_2 = True, False, None, (
+    FCLTokens.identifier, FCLTokens.colon, FCLRules.vt, FCLTokens.semicolon, FCLRules.c_var, FCLRules.vd
+)
+C_VAR = True, False, create_variable
+VT = True, True, set_value_type
+IDENTIF = True, True, identifier_token
+STRINGL = True, True, string_token
+NUMBERL = True, True, numeric_token
+ENDFNCB = True, True, end_function_block
+FZB = True, False, None, (
     FCLTokens.fuzzify, FCLTokens.identifier, FCLRules.fzm, FCLRules.un, FCLRules.rn, FCLRules.c_fzb, FCLRules.tr,
-    FCLTokens.end_fuzzify), True, False, None, -1
-
-FZM = 4, (FCLTokens.method, FCLTokens.colon, FCLRules.fzm1, FCLTokens.semicolon), True, False, None, -1
-
-FZM1 = 0, None, True, True, set_fuzzify_method, -1
-
-UN1 = 0, None, True, False, null_units, -1
-
-UN = 5, (
-    FCLTokens.units, FCLTokens.colon, FCLTokens.string_literal, FCLTokens.semicolon, FCLRules.c_un
-), True, False, None, -1
-
-RN = 11, (
+    FCLTokens.end_fuzzify
+)
+FZM = True, False, None, (FCLTokens.method, FCLTokens.colon, FCLRules.fzm1, FCLTokens.semicolon)
+FZM1 = True, True, set_fuzzify_method
+UN1 = True, False, null_units
+UN = True, False, None, (FCLTokens.units, FCLTokens.colon, FCLTokens.string_literal, FCLTokens.semicolon, FCLRules.c_un)
+RN = True, False, None, (
     FCLTokens.range_tok, FCLTokens.assign, FCLTokens.lbrac, FCLTokens.numeric_literal, FCLRules.c_inf,
     FCLTokens.doubledot, FCLTokens.numeric_literal, FCLRules.c_sup, FCLRules.rn1, FCLTokens.rbrac, FCLTokens.semicolon
-), True, False, None, -1
-
-RN1_1 = 0, None, True, False, None, -1
-
-RN1_2 = 3, (FCLTokens.comma, FCLTokens.numeric_literal, FCLRules.c_pnt), True, False, None, -1
-
-C_PNT = 0, None, True, False, set_points_count, -1
-
-C_UN = 0, None, True, False, set_units, -1
-
-C_INF = 0, None, True, False, set_infinum, -1
-
-C_SUP = 0, None, True, False, set_supremum, -1
-
-C_FZB = 0, None, True, False, set_in_var_param, -1
-
-TR_1 = 0, None, True, False, None, -1
-
-TR_2 = 8, (
+)
+RN1_1 = True, False,
+RN1_2 = True, False, None, (FCLTokens.comma, FCLTokens.numeric_literal, FCLRules.c_pnt),
+C_PNT = True, False, set_points_count
+C_UN = True, False, set_units
+C_INF = True, False, set_infinum
+C_SUP = True, False, set_supremum
+C_FZB = True, False, set_in_var_param
+TR_1 = True, False
+TR_2 = True, False, None, (
     FCLTokens.term, FCLTokens.identifier, FCLTokens.assign, FCLRules.mf, FCLRules.lrn, FCLTokens.semicolon,
     FCLRules.c_ter, FCLRules.tr
-), True, False, None, -1
-
-LRN1 = 0, None, True, False, false_learn, -1
-
-LRN2 = 1, (FCLTokens.learn,), True, False, true_learn, -1
-
-C_TER = 0, None, True, False, create_term, -1
-
-MF = 3, (FCLRules.mt, FCLRules.c_mt, FCLRules.pt), True, False, None, -1
-
-MT = 0, None, True, True, set_func_type, -1
-
-C_MT = 0, None, True, False, create_func, -1
-
-PT_1 = 0, None, True, False, None, -1
-
-PT_2 = 9, (
+)
+LRN1 = True, False, false_learn
+LRN2 = True, False, true_learn, (FCLTokens.learn,)
+C_TER = True, False, create_term,
+MF = True, False, None, (FCLRules.mt, FCLRules.c_mt, FCLRules.pt)
+MT = True, True, set_func_type
+C_MT = True, False, create_func
+PT_1 = True, False,
+PT_2 = True, False, None, (
     FCLTokens.lbrac, FCLTokens.numeric_literal, FCLRules.c_xdom, FCLTokens.comma, FCLTokens.numeric_literal,
     FCLRules.c_ydom, FCLTokens.rbrac, FCLRules.c_pt, FCLRules.pt
-), True, False, None, -1
-
-C_XDOM = 0, None, True, False, set_x_val, -1
-
-C_YDOM = 0, None, True, False, set_y_val, -1
-
-C_PT = 0, None, True, False, create_point, -1
-
-DFB = 8, (
+)
+C_XDOM = True, False, set_x_val
+C_YDOM = True, False, set_y_val
+C_PT = True, False, create_point
+DFB = True, False, None, (
     FCLTokens.defuzzify, FCLTokens.identifier, FCLRules.dfm, FCLRules.un, FCLRules.rn, FCLRules.c_dfb, FCLRules.tr,
     FCLTokens.end_defuzzify
-), True, False, None, -1
+)
 
-DFM = 4, (FCLTokens.method, FCLTokens.colon, FCLRules.dfm1, FCLTokens.semicolon), True, False, None, -1
-
-DFM1 = 0, None, True, True, set_defuzzify_method, -1
-
-C_DFB = 0, None, True, False, set_out_var_param, -1
-
-RB = 6, (
+DFM = True, False, None, (FCLTokens.method, FCLTokens.colon, FCLRules.dfm1, FCLTokens.semicolon)
+DFM1 = True, True, set_defuzzify_method
+C_DFB = True, False, set_out_var_param
+RB = True, False, None, (
     FCLTokens.ruleblock, FCLTokens.identifier, FCLRules.ob, FCLRules.c_rb, FCLRules.rl, FCLTokens.end_ruleblock
-), True, False, None, -1
-
-OB = 6, (
+)
+OB = True, False, None, (
     FCLTokens.operation_base, FCLTokens.colon, FCLRules.obt, FCLRules.rn1, FCLRules.obpn, FCLTokens.semicolon
-), True, False, None, -1
-
-RL_1 = 0, None, True, False, None, -1
-
-RL_2 = 13, (
+)
+RL_1 = True, False
+RL_2 = True, False, None, (
     FCLTokens.rule, FCLTokens.identifier, FCLRules.c_rl2, FCLTokens.colon, FCLTokens.if_tok, FCLRules.an,
     FCLTokens.then, FCLRules.cn, FCLRules.wt, FCLRules.lrn, FCLTokens.semicolon, FCLRules.c_rl, FCLRules.rl
-), True, False, None, -1
-
-OBT = 0, None, True, True, set_oper_base, -1
-
-OBPN = 0, None, True, False, set_oper_poins, -1
-
-WT_1 = 0, None, True, False, None, -1
-
-WT_2 = 3, (
-    FCLTokens.with_tok, FCLTokens.numeric_literal, FCLRules.c_wt
-), True, False, None, -1
-
-C_WT = 0, None, True, False, set_certainty, -1
-
-C_RB = 0, None, True, False, create_rule_block, -1
-
-C_RL = 0, None, True, False, create_rule, -1
-
-AN = 2, (FCLRules.an1, FCLRules.an2), True, False, None, -1
-
-AN1 = 2, (FCLRules.an3, FCLRules.an4), True, False, None, -1
-
-AN2_1 = 0, None, True, False, None, -1
-
-AN2_2 = 4, (
-    FCLTokens.or_tok, FCLRules.an1, FCLRules.c_an2, FCLRules.an2
-), True, False, None, -1
-
-AN3_1 = 4, (
-    FCLTokens.identifier, FCLRules.c_an3, FCLTokens.is_tok, FCLRules.ter
-), True, False, None, -1
-
-AN3_2 = 3, (FCLTokens.lbrac, FCLRules.an, FCLTokens.rbrac), True, False, None, -1
-
-AN3_3 = 3, (FCLTokens.not_tok, FCLRules.an, FCLRules.c_an33), True, False, None, -1
-
-AN4_1 = 0, None, True, False, None, -1
-
-AN4_2 = 4, (FCLTokens.and_tok, FCLRules.an3, FCLRules.c_an4, FCLRules.an4), True, False, None, -1
-
-C_AN3 = 0, None, True, False, add_in_var, -1
-
-C_AN33 = 0, None, True, False, add_in_not, -1
-
-C_AN2 = 0, None, True, False, add_in_or, -1
-
-C_AN4 = 0, None, True, False, add_in_and, -1
-
-TER = 2, (FCLRules.ter1, FCLRules.ter2), True, False, None, -1
-
-TER1 = 2, (FCLRules.ter3, FCLRules.ter4), True, False, None, -1
-
-TER2_1 = 0, None, True, False, None, -1
-
-TER2_2 = 0, (FCLTokens.or_tok, FCLRules.ter1, FCLRules.c_ter2, FCLRules.ter2), True, False, None, -1
-
-C_TER2 = 0, None, True, False, add_ter_or, -1
-
-TER3_1 = 2, (FCLTokens.identifier, FCLRules.c_ter31), True, False, None, -1
-
-C_TER31 = 0, None, True, False, add_term, -1
-
-TER3_2 = 3, (FCLTokens.lbrac, FCLRules.ter, FCLTokens.rbrac), True, False, None, -1
-
-TER3_3 = 3, (FCLTokens.not_tok, FCLRules.ter, FCLRules.c_ter33), True, False, None, -1
-
-TER3_4 = 3, (FCLTokens.con, FCLRules.ter, FCLRules.c_ter34), True, False, None, -1
-
-TER3_5 = 3, (FCLTokens.dil, FCLRules.ter, FCLRules.c_ter35), True, False, None, -1
-
-TER4_1 = 0, None, True, False, None, -1
-
-TER4_2 = 4, (FCLTokens.and_tok, FCLRules.ter3, FCLRules.c_ter4, FCLRules.ter4), True, False, None, -1
-
-C_TER33 = 0, None, True, False, add_term_not, -1
-
-C_TER34 = 0, None, True, False, add_term_con, -1
-
-C_TER35 = 0, None, True, False, add_term_dil, -1
-
-C_TER4 = 0, None, True, False, add_term_and, -1
-
-CN = 4, (FCLTokens.identifier, FCLRules.c_cn, FCLTokens.is_tok, FCLRules.ter), True, False, None, -1
-
-C_CN = 0, None, True, False, add_out_var, -1
-
-C_RL2 = 0, None, True, False, set_rule_name, -1
-
-FC_FZME = 0, None, False, False, bad_fuzzify, -1
-
-FC_DFME = 0, None, False, False, bad_defuzzify, -1
-
-FC_OPBE = 0, None, False, False, bad_oper_base, -1
+)
+OBT = True, True, set_oper_base
+OBPN = True, False, set_oper_poins
+WT_1 = True, False
+WT_2 = True, False, None, (FCLTokens.with_tok, FCLTokens.numeric_literal, FCLRules.c_wt)
+C_WT = True, False, set_certainty
+C_RB = True, False, create_rule_block
+C_RL = True, False, create_rule
+AN = True, False, None, (FCLRules.an1, FCLRules.an2)
+AN1 = True, False, None, (FCLRules.an3, FCLRules.an4)
+AN2_1 = True, False,
+AN2_2 = True, False, None, (FCLTokens.or_tok, FCLRules.an1, FCLRules.c_an2, FCLRules.an2)
+AN3_1 = True, False, None, (FCLTokens.identifier, FCLRules.c_an3, FCLTokens.is_tok, FCLRules.ter)
+AN3_2 = True, False, None, (FCLTokens.lbrac, FCLRules.an, FCLTokens.rbrac)
+AN3_3 = True, False, None, (FCLTokens.not_tok, FCLRules.an, FCLRules.c_an33)
+AN4_1 = True, False
+AN4_2 = True, False, None, (FCLTokens.and_tok, FCLRules.an3, FCLRules.c_an4, FCLRules.an4)
+C_AN3 = True, False, add_in_var
+C_AN33 = True, False, add_in_not
+C_AN2 = True, False, add_in_or
+C_AN4 = True, False, add_in_and
+TER = True, False, None, (FCLRules.ter1, FCLRules.ter2)
+TER1 = True, False, None, (FCLRules.ter3, FCLRules.ter4)
+TER2_1 = True, False, None
+TER2_2 = True, False, None, (FCLTokens.or_tok, FCLRules.ter1, FCLRules.c_ter2, FCLRules.ter2)
+C_TER2 = True, False, add_ter_or
+TER3_1 = True, False, None, (FCLTokens.identifier, FCLRules.c_ter31)
+C_TER31 = True, False, add_term
+TER3_2 = True, False, None, (FCLTokens.lbrac, FCLRules.ter, FCLTokens.rbrac)
+TER3_3 = True, False, None, (FCLTokens.not_tok, FCLRules.ter, FCLRules.c_ter33)
+TER3_4 = True, False, None, (FCLTokens.con, FCLRules.ter, FCLRules.c_ter34)
+TER3_5 = True, False, None, (FCLTokens.dil, FCLRules.ter, FCLRules.c_ter35)
+TER4_1 = True, False
+TER4_2 = True, False, None, (FCLTokens.and_tok, FCLRules.ter3, FCLRules.c_ter4, FCLRules.ter4)
+C_TER33 = True, False, add_term_not
+C_TER34 = True, False, add_term_con
+C_TER35 = True, False, add_term_dil
+C_TER4 = True, False, add_term_and
+CN = True, False, None, (FCLTokens.identifier, FCLRules.c_cn, FCLTokens.is_tok, FCLRules.ter)
+C_CN = True, False, add_out_var
+C_RL2 = True, False, set_rule_name
+FC_FZME = False, False, bad_fuzzify
+FC_DFME = False, False, bad_defuzzify
+FC_OPBE = False, False, bad_oper_base
 
 MATRIX = [
 

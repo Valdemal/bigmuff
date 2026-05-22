@@ -7,10 +7,9 @@ from fcl.translator.matrix import MATRIX
 
 class Translator:
     def __init__(self):
-        self._stack: list[FCLRules] = [
+        self._stack: list[FCLTokens | FCLRules] = [
             FCLRules.emptystack, FCLRules.fb,
         ]
-        self._current_state = 0
         self._error_state = 0
 
     def translate(self, parser: FCLParser, builder: Builder):
@@ -26,16 +25,12 @@ class Translator:
             if element.pop:
                 self._stack.pop()
 
-            if element.count:
-                for i in reversed(range(element.count)):
-                    # todo watafa
-                    self._stack.append(element.to_stack[i])
+            if element.to_stack:
+                for el in reversed(element.to_stack):
+                    self._stack.append(el)
 
             if element.next:
                 in_prog.popleft()
-
-            if element.nextstate != -1:
-                self._current_state = element.nextstate
 
             flag = current_element.id != FCLTokens.endfcl and self._error_state == 0
 

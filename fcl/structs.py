@@ -1,9 +1,9 @@
-from typing import Callable
+from typing import Callable, Iterable
 
 from attr import dataclass
 
 from builder import Builder
-from fcl.enums import FCLTokens
+from fcl.enums import FCLTokens, FCLRules
 from kernel.block.rule import TRuleBlock
 from kernel.consts import BaseSet, Natural
 from kernel.enums import VariableType, ValueType, FuzzifyMethod, DefuzzifyMethod, MemberFuncType
@@ -23,12 +23,10 @@ class FCLElement:
 
 @dataclass
 class FCLMatrixSymbol:
-    count: int
-    to_stack: str
     pop: bool
     next: bool
-    action: Callable[[FCLElement, Builder], None]
-    nextstate: int
+    action: Callable[[FCLElement, Builder], None] = None
+    to_stack: Iterable[FCLTokens | FCLRules] = ()
 
 @dataclass
 class ParserState:
