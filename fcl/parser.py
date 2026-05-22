@@ -7,24 +7,23 @@ from fcl.structs import FCLElement
 
 FCLProgram = deque[FCLElement]
 
+
 class FCLParser:
     def __init__(self, filename: str):
         self._filename = filename
-        self._tokens = FCLProgram()
         self._str_pos = 0
         self._input_stream = open(filename, 'r')
 
-    @property
-    def tokens(self) -> FCLProgram:
-        return self._tokens
-
-    def parse(self):
+    def parse(self) -> FCLProgram:
+        tokens = FCLProgram()
         while line := self._input_stream.readline():
             self._str_pos += 1
             for token in self._parse_line(line):
-                self._tokens.append(token)
+                tokens.append(token)
 
+        tokens.append(FCLElement(FCLTokens.endfcl, "", 0, 0))
         self._input_stream.close()
+        return tokens
 
     def _parse_line(self, line: str) -> Iterable[FCLElement]:
         beg, lenght = 0, len(line)
@@ -95,12 +94,12 @@ class FCLParser:
 
                     idx = FCLTokens.numeric_literal.value
 
-
             if idx == FCLTokens.end_comment.value:
                 raise Exception()
 
             yield FCLElement(FCLTokens(idx), value, self._str_pos, beg + 1)
             beg = end
+
     def __del__(self):
         if not self._input_stream.closed:
             self._input_stream.close()

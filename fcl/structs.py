@@ -2,6 +2,7 @@ from typing import Callable
 
 from attr import dataclass
 
+from builder import Builder
 from fcl.enums import FCLTokens
 from kernel.block.rule import TRuleBlock
 from kernel.consts import BaseSet, Natural
@@ -13,21 +14,21 @@ from kernel.variables.custom import TCustomVariable
 
 
 @dataclass
-class FCLMatrixSymbol:
-    count: int
-    to_stack: str
-    pop: bool
-    next: bool
-    action: Callable
-    nextstate: int
-
-
-@dataclass
 class FCLElement:
     id: FCLTokens
     value: str
     str_pos: int
     chr_pos: int
+
+
+@dataclass
+class FCLMatrixSymbol:
+    count: int
+    to_stack: str
+    pop: bool
+    next: bool
+    action: Callable[[FCLElement, Builder], None]
+    nextstate: int
 
 @dataclass
 class ParserState:
