@@ -29,6 +29,10 @@ class TOperationBase(ABC):
     def points(self):
         return self._points
 
+    @points.setter
+    def points(self, value: int):
+        self._points = value
+
     @abstractmethod
     def t_norm(self, op1: Membership, op2: Membership) -> Membership:
         """

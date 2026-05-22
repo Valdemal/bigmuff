@@ -170,7 +170,7 @@ class TRuleBlock(TNeuroFuzzyBase):
         if outvar >= len(self._input):
             return -1
 
-        return self._input[outvar].is_term_exists(name)
+        return self._output[outvar].is_term_exists(name)
 
     def evaluate(self, inp: List[TFuzzySet]) -> List[TFuzzySet]:
         """Получение выходных сигналов"""

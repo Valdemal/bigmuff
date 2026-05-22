@@ -1,14 +1,13 @@
 import sys
-from abc import ABC, abstractmethod
 from typing import List
 
+from kernel.base import TNeuroFuzzyBase, LS, GE, INRANGE, GT, EQ, ZR
 from kernel.consts import BaseSet, Membership, Natural, MemberFuncTypeName
 from kernel.enums import MemberFuncType
 from kernel.exceptions import EMemberFunc, NFE_INVALID_BASE, NFE_INVALID_INDEX, NFE_OUT_OF_DOMAIN
-from kernel.base import TNeuroFuzzyBase, LS, GE, INRANGE, GT, EQ, ZR
 
 
-class TMemberFunc(TNeuroFuzzyBase, ABC):
+class TMemberFunc(TNeuroFuzzyBase):
     """
     Виртуальный базовый класс функции принадлежности
     """
@@ -241,7 +240,6 @@ class TMemberFunc(TNeuroFuzzyBase, ABC):
             elif LS(self._node[i].x, self._inf_base):
                 self._node[i].x = self._inf_base
 
-    @abstractmethod
     def _get_value(self, value: BaseSet) -> Membership:
         """
         Получение значения функции принадлежности (должен быть переопределен)

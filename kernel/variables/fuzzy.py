@@ -9,7 +9,7 @@ from .custom import TCustomVariable
 from ..enums import FuzzifyMethod, DefuzzifyMethod, ValueType, OperationCode, VariableType
 from ..exceptions import EFuzzyVariable, NFE_INVALID_EXPRESSION
 from ..fuzzy_set import TFuzzySet
-from ..base import RESULT_FUNC
+from ..member_func import RESULT_FUNC
 from ..operation import TOperationBase
 
 
@@ -180,6 +180,9 @@ class TFuzzyVariable(TCustomVariable):
             True если значение существует
         """
         return self._fs is not None and value == self._fs.name
+
+    def is_term_exists(self, term: str) -> int:
+        return 0 if term == self.name else -1
 
     # def __str__(self) -> str:
     #     """

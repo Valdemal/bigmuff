@@ -87,10 +87,18 @@ class TCustomVariable(TNeuroFuzzyBase, ABC):
         """Получить метод фаззификации"""
         return self._fuzzify
 
+    @fuzzify.setter
+    def fuzzify(self, value: FuzzifyMethod):
+        self._fuzzify = value
+
     @property
     def defuzzify(self) -> DefuzzifyMethod:
         """Получить метод дефаззификации"""
         return self._defuzzify
+
+    @defuzzify.setter
+    def defuzzify(self, value: DefuzzifyMethod):
+        self._defuzzify = value
 
     @property
     def units(self) -> str:

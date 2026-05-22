@@ -7,7 +7,8 @@ from ..enums import FuzzifyMethod, DefuzzifyMethod, ValueType, OperationCode, Va
 from ..exceptions import ELingVariable, NFE_INVALID_BASE, NFE_INVALID_INDEX, NFE_INVALID_BASE_SET, \
     NFE_INVALID_EXPRESSION
 from ..fuzzy_set import TFuzzySet
-from ..base import GE, LS, RESULT_FUNC
+from ..base import GE, LS
+from ..member_func import RESULT_FUNC
 from ..operation import TOperationBase
 
 
@@ -236,68 +237,68 @@ class TLingVariable(TCustomVariable):
         """
         res: List[TFuzzySet] = []
 
-        try:
-            i = 0
-            while i < len(revform):
-                opcode = revform[i]
+        # try:
+        i = 0
+        while i < len(revform):
+            opcode = revform[i]
+            i += 1
+
+            if opcode == OperationCode.ocValue:
+                val = revform[i]
                 i += 1
 
-                if opcode == OperationCode.ocValue:
-                    val = revform[i]
-                    i += 1
+                if val >= len(self._term):
+                    raise Exception("неверный индекс терма ЛП")
 
-                    if val >= len(self._term):
-                        raise Exception("неверный индекс терма ЛП")
+                op = self._term[val]
+                res.append(TFuzzySet(
+                    op.name,
+                    RESULT_FUNC(op.func.inf, op.func.sup, op.ops.points),
+                    op.ops
+                ))
 
-                    op = self._term[val]
-                    res.append(TFuzzySet(
-                        op.name,
-                        RESULT_FUNC(op.func.inf, op.func.sup, op.ops.points),
-                        op.ops
-                    ))
+            elif opcode == OperationCode.ocNot:
+                if not res:
+                    raise Exception("недостаточно операндов")
+                op = res.pop()
+                res.append(~op)
 
-                elif opcode == OperationCode.ocNot:
-                    if not res:
-                        raise Exception("недостаточно операндов")
-                    op = res.pop()
-                    res.append(~op)
+            elif opcode == OperationCode.ocVery:
+                if not res:
+                    raise Exception("недостаточно операндов")
+                op = res.pop()
+                res.append(op.con())
 
-                elif opcode == OperationCode.ocVery:
-                    if not res:
-                        raise Exception("недостаточно операндов")
-                    op = res.pop()
-                    res.append(op.con())
+            elif opcode == OperationCode.ocAverage:
+                if not res:
+                    raise Exception("недостаточно операндов")
+                op = res.pop()
+                res.append(op.dil())
 
-                elif opcode == OperationCode.ocAverage:
-                    if not res:
-                        raise Exception("недостаточно операндов")
-                    op = res.pop()
-                    res.append(op.dil())
+            elif opcode == OperationCode.ocAnd:
+                if len(res) < 2:
+                    raise Exception("недостаточно операндов")
+                op2 = res.pop()
+                op1 = res.pop()
+                res.append(op1 & op2)
 
-                elif opcode == OperationCode.ocAnd:
-                    if len(res) < 2:
-                        raise Exception("недостаточно операндов")
-                    op2 = res.pop()
-                    op1 = res.pop()
-                    res.append(op1 & op2)
+            elif opcode == OperationCode.ocOr:
+                if len(res) < 2:
+                    raise Exception("недостаточно операндов")
+                op2 = res.pop()
+                op1 = res.pop()
+                res.append(op1 | op2)
 
-                elif opcode == OperationCode.ocOr:
-                    if len(res) < 2:
-                        raise Exception("недостаточно операндов")
-                    op2 = res.pop()
-                    op1 = res.pop()
-                    res.append(op1 | op2)
+            else:
+                raise Exception(f"неверный оператор: {opcode}")
 
-                else:
-                    raise Exception(f"неверный оператор: {opcode}")
+        if len(res) != 1:
+            raise Exception("неполное выражение")
 
-            if len(res) != 1:
-                raise Exception("неполное выражение")
+        return res[0]
 
-            return res[0]
-
-        except Exception as e:
-            raise ELingVariable(str(e), NFE_INVALID_EXPRESSION)
+        # except Exception as e:
+        #     raise ELingVariable(str(e), NFE_INVALID_EXPRESSION)
 
     # def __str__(self) -> str:
     #     """
