@@ -1,4 +1,5 @@
 import sys
+from abc import abstractmethod, ABC
 from typing import List
 
 from kernel.base import TNeuroFuzzyBase, LS, GE, INRANGE, GT, EQ, ZR
@@ -7,7 +8,7 @@ from kernel.enums import MemberFuncType
 from kernel.exceptions import EMemberFunc, NFE_INVALID_BASE, NFE_INVALID_INDEX, NFE_OUT_OF_DOMAIN
 
 
-class TMemberFunc(TNeuroFuzzyBase):
+class TMemberFunc(TNeuroFuzzyBase, ABC):
     """
     Виртуальный базовый класс функции принадлежности
     """
@@ -28,31 +29,8 @@ class TMemberFunc(TNeuroFuzzyBase):
         self._inf_base = a_inf
         self._sup_base = a_sup
         self._type = MemberFuncType.mfNA
-        self._node: List['TNodeValue'] = []
+        self._nodes: List['TNodeValue'] = []
         self._data: List[Membership] = []
-
-    def __copy__(self) -> 'TMemberFunc':
-        """Конструктор копирования"""
-        return self._copy_impl()
-
-    def __deepcopy__(self, memo) -> 'TMemberFunc':
-        """Глубокое копирование"""
-        return self._copy_impl()
-
-    def _copy_impl(self) -> 'TMemberFunc':
-        """Внутренняя реализация копирования"""
-        result = TMemberFunc.__new__(TMemberFunc)
-        result._inf_base = self._inf_base
-        result._sup_base = self._sup_base
-        result._type = self._type
-        result._node = self._node.copy()
-        result._data = self._data.copy()
-        return result
-
-    def __del__(self):
-        """Деструктор"""
-        self._node.clear()
-        self._data.clear()
 
     @property
     def inf(self) -> BaseSet:
@@ -73,6 +51,7 @@ class TMemberFunc(TNeuroFuzzyBase):
         """Получить верхнюю границу базового множества"""
         return self._sup_base
 
+
     @sup.setter
     def sup(self, value: BaseSet):
         """Установить верхнюю границу базового множества"""
@@ -81,6 +60,14 @@ class TMemberFunc(TNeuroFuzzyBase):
             self._adjust_nodes()
         else:
             raise EMemberFunc("", NFE_INVALID_BASE)
+
+    @property
+    def nodes(self):
+        return self._nodes
+
+    @property
+    def data(self):
+        return self._data
 
     @property
     def type(self) -> MemberFuncType:
@@ -107,51 +94,11 @@ class TMemberFunc(TNeuroFuzzyBase):
         """
         return False
 
-    @property
-    def node_count(self) -> Natural:
-        """Количество опорных точек"""
-        return len(self._node)
-
-    @property
-    def data_count(self) -> Natural:
-        """Размер вектора данных"""
-        return len(self._data)
-
-    def node(self, index: Natural) -> 'TNodeValue':
-        """
-        Получить опорную точку по индексу
-
-        Args:
-            index: индекс точки
-
-        Returns:
-            точка
-        """
-        if index < len(self._node):
-            return self._node[index]
-        else:
-            raise EMemberFunc("", NFE_INVALID_INDEX)
-
     def __getitem__(self, index: Natural) -> Membership:
         return self._data[index]
 
     def __setitem__(self, key, value):
         self._data[key] = value
-
-    def data(self, index: Natural) -> Membership:
-        """
-        Получить значение вектора по индексу
-
-        Args:
-            index: индекс
-
-        Returns:
-            значение степени принадлежности
-        """
-        if index < len(self._data):
-            return self._data[index]
-        else:
-            raise EMemberFunc("", NFE_INVALID_INDEX)
 
     def __call__(self, value: BaseSet) -> Membership:
         """
@@ -176,20 +123,20 @@ class TMemberFunc(TNeuroFuzzyBase):
             value: добавляемая точка
         """
         if INRANGE(value.x, self._inf_base, self._sup_base):
-            last = len(self._node) - 1
+            last = len(self._nodes) - 1
 
             i = 0
-            while i <= last and GT(value.x, self._node[i].x):
+            while i <= last and GT(value.x, self._nodes[i].x):
                 i += 1
 
             if i > last:
-                self._node.append(value)
-            elif EQ(value.x, self._node[i].x):
-                self._node[i].dom = value.dom
+                self._nodes.append(value)
+            elif EQ(value.x, self._nodes[i].x):
+                self._nodes[i].dom = value.dom
             else:
-                self._node.insert(i, value)
+                self._nodes.insert(i, value)
 
-            self._node[i].owner = self
+            self._nodes[i].owner = self
         else:
             raise EMemberFunc("", NFE_OUT_OF_DOMAIN)
 
@@ -201,8 +148,8 @@ class TMemberFunc(TNeuroFuzzyBase):
             value: добавляемая точка
         """
         if INRANGE(value.x, self._inf_base, self._sup_base):
-            self._node.append(value)
-            self._node[-1].owner = self
+            self._nodes.append(value)
+            self._nodes[-1].owner = self
         else:
             raise EMemberFunc("", NFE_OUT_OF_DOMAIN)
 
@@ -213,8 +160,8 @@ class TMemberFunc(TNeuroFuzzyBase):
         Args:
             index: индекс удаляемой точки
         """
-        if index < len(self._node):
-            del self._node[index]
+        if index < len(self._nodes):
+            del self._nodes[index]
         else:
             raise EMemberFunc("", NFE_INVALID_INDEX)
 
@@ -234,12 +181,14 @@ class TMemberFunc(TNeuroFuzzyBase):
 
     def _adjust_nodes(self):
         """Привести узловые точки в соответствие с границами"""
-        for i in range(len(self._node)):
-            if GT(self._node[i].x, self._sup_base):
-                self._node[i].x = self._sup_base
-            elif LS(self._node[i].x, self._inf_base):
-                self._node[i].x = self._inf_base
+        for i in range(len(self._nodes)):
+            if GT(self._nodes[i].x, self._sup_base):
+                self._nodes[i].x = self._sup_base
+            elif LS(self._nodes[i].x, self._inf_base):
+                self._nodes[i].x = self._inf_base
 
+
+    @abstractmethod
     def _get_value(self, value: BaseSet) -> Membership:
         """
         Получение значения функции принадлежности (должен быть переопределен)
@@ -250,7 +199,7 @@ class TMemberFunc(TNeuroFuzzyBase):
         Returns:
             степень принадлежности
         """
-        return 0.0
+        pass
 
     def cog(self, points: Natural) -> BaseSet:
         """
@@ -392,8 +341,8 @@ class TMemberFunc(TNeuroFuzzyBase):
         Инвертирование функции принадлежности: m(x) = 1 - m(x)
         """
         if self.is_nodes():
-            for i in range(len(self._node)):
-                self._node[i].dom = 1.0 - self._node[i].dom
+            for i in range(len(self._nodes)):
+                self._nodes[i].dom = 1.0 - self._nodes[i].dom
         elif self.is_vector():
             for i in range(len(self._data)):
                 self._data[i] = 1.0 - self._data[i]
@@ -408,8 +357,8 @@ class TMemberFunc(TNeuroFuzzyBase):
         result = f"{MemberFuncTypeName.get(self._type, 'UNKNOWN')} "
 
         if self.is_nodes():
-            for i in range(len(self._node)):
-                result += str(self._node[i]) + " "
+            for i in range(len(self._nodes)):
+                result += str(self._nodes[i]) + " "
         elif self.is_vector():
             x = self._inf_base
             if len(self._data) > 1:

@@ -41,20 +41,6 @@ class TMemberFuncLnVect(TMemberFunc):
             # Пустой конструктор
             self._data = []
 
-    def __copy__(self) -> 'TMemberFuncLnVect':
-        """Конструктор копирования"""
-        result = TMemberFuncLnVect(self._inf_base, self._sup_base)
-        result._data = self._data.copy()
-        result._type = self._type
-        return result
-
-    def __deepcopy__(self, memo) -> 'TMemberFuncLnVect':
-        """Глубокое копирование"""
-        result = TMemberFuncLnVect(self._inf_base, self._sup_base)
-        result._data = self._data.copy()
-        result._type = self._type
-        return result
-
     def is_nodes(self) -> bool:
         """Функция представлена опорными точками"""
         return False

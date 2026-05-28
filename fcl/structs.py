@@ -12,7 +12,7 @@ from kernel.member_func.base import TMemberFunc
 from kernel.operation import TOperationBase
 from kernel.variables.custom import TCustomVariable
 
-
+# Структура лексемы
 @dataclass
 class FCLElement:
     id: FCLTokens

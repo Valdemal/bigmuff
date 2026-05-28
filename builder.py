@@ -118,7 +118,7 @@ class Builder:
             case MemberFuncType.mfSingleton | MemberFuncType.mfSmooth | MemberFuncType.mfLinear | MemberFuncType.mfNA:
                 self._current_func.add_node(TNodeValue(self._x, self._y))
             case MemberFuncType.mfLnVector:
-                idx = self._x * (self._current_func.data_count - 1) // (self._current_func.sup - self._current_func.inf)
+                idx = self._x * (len(self._current_func.data) - 1) // (self._current_func.sup - self._current_func.inf)
                 self._current_func[idx] = self._y
 
     def set_var_type(self, var_type: VariableType):
@@ -197,7 +197,10 @@ class Builder:
         self._points = value
 
     def create_rule_block(self):
-        self.current_rules = self.func_block.block(self.func_block.add_block(self.identifier, self.oper_base))
+        new_index = self.func_block.add_block(
+            TRuleBlock(self.identifier, self.oper_base)
+        )
+        self.current_rules = self.func_block.blocks[new_index]
 
     def create_rule(self):
         i = self.current_rules.add_rule(

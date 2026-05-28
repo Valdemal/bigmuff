@@ -77,14 +77,14 @@ class TMemberFuncSmooth(TMemberFunc):
     def __copy__(self) -> 'TMemberFuncSmooth':
         """Конструктор копирования"""
         result = TMemberFuncSmooth(self._inf_base, self._sup_base)
-        result._node = self._node.copy()
+        result._nodes = self._nodes.copy()
         result._type = self._type
         return result
 
     def __deepcopy__(self, memo) -> 'TMemberFuncSmooth':
         """Глубокое копирование"""
         result = TMemberFuncSmooth(self._inf_base, self._sup_base)
-        result._node = [TNodeValue(n.x, n.dom, result) for n in self._node]
+        result._nodes = [TNodeValue(n.x, n.dom, result) for n in self._nodes]
         result._type = self._type
         return result
 
@@ -101,7 +101,7 @@ class TMemberFuncSmooth(TMemberFunc):
         max_val = 0.0
         x_max = self._inf_base
 
-        for n in self._node:
+        for n in self._nodes:
             if GT(n.dom, max_val):
                 max_val = n.dom
                 x_max = n.x
@@ -113,7 +113,7 @@ class TMemberFuncSmooth(TMemberFunc):
         max_val = 0.0
         x_max = self._sup_base
 
-        for n in reversed(self._node):
+        for n in reversed(self._nodes):
             if GT(n.dom, max_val):
                 max_val = n.dom
                 x_max = n.x
@@ -126,7 +126,7 @@ class TMemberFuncSmooth(TMemberFunc):
         x_start = self._inf_base
         x_end = self._inf_base
 
-        for n in self._node:
+        for n in self._nodes:
             if GT(n.dom, max_val):
                 max_val = n.dom
                 x_start = n.x
@@ -141,19 +141,19 @@ class TMemberFuncSmooth(TMemberFunc):
         Получить значение функции принадлежности (гладкая интерполяция)
         Используется S-образная интерполяция
         """
-        last = len(self._node) - 1
+        last = len(self._nodes) - 1
 
-        if LS(value, self._node[0].x) or GT(value, self._node[last].x):
+        if LS(value, self._nodes[0].x) or GT(value, self._nodes[last].x):
             return 0.0
 
         i = 0
-        while i <= last and GE(value, self._node[i].x):
+        while i <= last and GE(value, self._nodes[i].x):
             i += 1
 
-        x1 = self._node[i-1].x
-        x2 = self._node[i].x
-        y1 = self._node[i-1].dom
-        y2 = self._node[i].dom
+        x1 = self._nodes[i - 1].x
+        x2 = self._nodes[i].x
+        y1 = self._nodes[i - 1].dom
+        y2 = self._nodes[i].dom
 
         if EQ(value, x2):
             return y2

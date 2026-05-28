@@ -2,12 +2,11 @@ import sys
 from typing import Optional, List
 
 from .custom import TCustomVariable
+from ..base import GE, LS
 from ..consts import BaseSet, Natural
 from ..enums import FuzzifyMethod, DefuzzifyMethod, ValueType, OperationCode, VariableType
-from ..exceptions import ELingVariable, NFE_INVALID_BASE, NFE_INVALID_INDEX, NFE_INVALID_BASE_SET, \
-    NFE_INVALID_EXPRESSION
+from ..exceptions import ELingVariable, NFE_INVALID_BASE, NFE_INVALID_INDEX, NFE_INVALID_BASE_SET
 from ..fuzzy_set import TFuzzySet
-from ..base import GE, LS
 from ..member_func import RESULT_FUNC
 from ..operation import TOperationBase
 
@@ -17,7 +16,7 @@ class TLingVariable(TCustomVariable):
     Лингвистическая переменная
     """
 
-    def __init__(self, a_name: str, a_inf: BaseSet, a_sup: BaseSet,
+    def __init__(self, name: str, a_inf: BaseSet, a_sup: BaseSet,
                  a_ops: TOperationBase,
                  a_fmethod: Optional[FuzzifyMethod] = None,
                  a_dfmethod: Optional[DefuzzifyMethod] = None):
@@ -25,7 +24,7 @@ class TLingVariable(TCustomVariable):
         Конструктор лингвистической переменной
 
         Args:
-            a_name: имя переменной
+            name: имя переменной
             a_inf: нижняя граница
             a_sup: верхняя граница
             a_ops: набор базовых операций
@@ -33,9 +32,9 @@ class TLingVariable(TCustomVariable):
             a_dfmethod: метод дефаззификации
         """
         if a_fmethod is not None and a_dfmethod is not None:
-            super().__init__(a_name, a_fmethod, a_dfmethod)
+            super().__init__(name, a_fmethod, a_dfmethod)
         else:
-            super().__init__(a_name)
+            super().__init__(name)
 
         if GE(a_inf, a_sup):
             raise ELingVariable("", NFE_INVALID_BASE)
@@ -43,12 +42,12 @@ class TLingVariable(TCustomVariable):
         self._inf_base = a_inf
         self._sup_base = a_sup
         self._operation = a_ops
-        self._term: List[TFuzzySet] = []
+        self._terms: List[TFuzzySet] = []
         self.value_type = ValueType.valLinguistic
 
     @property
-    def term(self):
-        return self._term
+    def terms(self) -> List[TFuzzySet]:
+        return self._terms
 
     @property
     def ops(self) -> Optional[TOperationBase]:
@@ -56,13 +55,9 @@ class TLingVariable(TCustomVariable):
 
     @ops.setter
     def ops(self, value: TOperationBase):
-        for t in self._term:
+        for t in self._terms:
             t.ops = value
         self._operation = value
-
-    def __del__(self):
-        """Деструктор"""
-        self._term.clear()
 
     @property
     def inf(self) -> BaseSet:
@@ -74,7 +69,7 @@ class TLingVariable(TCustomVariable):
         """Установить нижнюю границу"""
         if LS(value, self._sup_base):
             self._inf_base = value
-            for t in self._term:
+            for t in self._terms:
                 t.func.inf = value
         else:
             raise ELingVariable("", NFE_INVALID_BASE)
@@ -89,25 +84,10 @@ class TLingVariable(TCustomVariable):
         """Установить верхнюю границу"""
         if LS(self._inf_base, value):
             self._sup_base = value
-            for t in self._term:
+            for t in self._terms:
                 t.func.sup = value
         else:
             raise ELingVariable("", NFE_INVALID_BASE)
-
-    def get_term(self, index: Natural) -> TFuzzySet:
-        """
-        Получить терм по индексу
-
-        Args:
-            index: индекс терма
-
-        Returns:
-            терм
-        """
-        if index < len(self._term):
-            return self._term[index]
-        else:
-            raise ELingVariable("", NFE_INVALID_INDEX)
 
     def set_term(self, index: Natural, value: TFuzzySet):
         """
@@ -117,8 +97,8 @@ class TLingVariable(TCustomVariable):
             index: индекс терма
             value: новое значение терма
         """
-        if index < len(self._term):
-            self._term[index] = value
+        if index < len(self._terms):
+            self._terms[index] = value
             value.ops = self._operation
         else:
             raise ELingVariable("", NFE_INVALID_INDEX)
@@ -133,7 +113,7 @@ class TLingVariable(TCustomVariable):
         if (fv.func.inf != self._inf_base) or (fv.func.sup != self._sup_base):
             raise ELingVariable("", NFE_INVALID_BASE_SET)
 
-        self._term.append(fv)
+        self._terms.append(fv)
         fv.ops = self._operation
 
     def del_term(self, index: Natural):
@@ -143,8 +123,8 @@ class TLingVariable(TCustomVariable):
         Args:
             index: индекс удаляемого терма
         """
-        if index < len(self._term):
-            del self._term[index]
+        if index < len(self._terms):
+            del self._terms[index]
         else:
             raise ELingVariable("", NFE_INVALID_INDEX)
 
@@ -152,15 +132,15 @@ class TLingVariable(TCustomVariable):
         """
         Упорядочивание термов по центру площади (COA)
         """
-        n = len(self._term)
+        n = len(self._terms)
         for i in range(n - 2, -1, -1):
             swapped = False
             for j in range(i + 1):
-                coa_j = self._term[j].func.coa(self._term[j].ops.points)
-                coa_j1 = self._term[j + 1].func.coa(self._term[j + 1].ops.points)
+                coa_j = self._terms[j].func.coa(self._terms[j].ops.points)
+                coa_j1 = self._terms[j + 1].func.coa(self._terms[j + 1].ops.points)
 
                 if coa_j > coa_j1:
-                    self._term[j], self._term[j + 1] = self._term[j + 1], self._term[j]
+                    self._terms[j], self._terms[j + 1] = self._terms[j + 1], self._terms[j]
                     swapped = True
 
             if not swapped:
@@ -176,8 +156,7 @@ class TLingVariable(TCustomVariable):
         Returns:
             нечеткое множество
         """
-        if self._term:
-            return self._term[0].fuzzificate(crisp, self._fuzzify)
+        return self._terms[0].fuzzificate(crisp, self._fuzzify)
 
     def _internal_defuzzificate(self, value: Optional[TFuzzySet]) -> float:
         """
@@ -204,7 +183,7 @@ class TLingVariable(TCustomVariable):
         Returns:
             True если значение существует
         """
-        for t in self._term:
+        for t in self._terms:
             if t.name == value:
                 return True
         return False
@@ -219,7 +198,7 @@ class TLingVariable(TCustomVariable):
         Returns:
             индекс терма или -1 если не найден
         """
-        for i, t in enumerate(self._term):
+        for i, t in enumerate(self._terms):
             if t.name == value:
                 return i
         return -1
@@ -237,60 +216,61 @@ class TLingVariable(TCustomVariable):
         """
         res: List[TFuzzySet] = []
 
-        # try:
+        # todo check here:
         i = 0
         while i < len(revform):
             opcode = revform[i]
             i += 1
 
-            if opcode == OperationCode.ocValue:
-                val = revform[i]
-                i += 1
+            match opcode:
+                case OperationCode.ocValue:
+                    val = revform[i]
+                    i += 1
 
-                if val >= len(self._term):
-                    raise Exception("неверный индекс терма ЛП")
+                    if val >= len(self._terms):
+                        raise Exception("неверный индекс терма ЛП")
 
-                op = self._term[val]
-                res.append(TFuzzySet(
-                    op.name,
-                    RESULT_FUNC(op.func.inf, op.func.sup, op.ops.points),
-                    op.ops
-                ))
+                    op = self._terms[val]
+                    res.append(TFuzzySet(
+                        op.name,
+                        RESULT_FUNC(op.func.inf, op.func.sup, op.ops.points),
+                        op.ops
+                    ))
 
-            elif opcode == OperationCode.ocNot:
-                if not res:
-                    raise Exception("недостаточно операндов")
-                op = res.pop()
-                res.append(~op)
+                case OperationCode.ocNot:
+                    if not res:
+                        raise Exception("недостаточно операндов")
 
-            elif opcode == OperationCode.ocVery:
-                if not res:
-                    raise Exception("недостаточно операндов")
-                op = res.pop()
-                res.append(op.con())
+                    res.append(~res.pop())
 
-            elif opcode == OperationCode.ocAverage:
-                if not res:
-                    raise Exception("недостаточно операндов")
-                op = res.pop()
-                res.append(op.dil())
+                case OperationCode.ocVery:
+                    if not res:
+                        raise Exception("недостаточно операндов")
 
-            elif opcode == OperationCode.ocAnd:
-                if len(res) < 2:
-                    raise Exception("недостаточно операндов")
-                op2 = res.pop()
-                op1 = res.pop()
-                res.append(op1 & op2)
+                    res.append(res.pop().con())
 
-            elif opcode == OperationCode.ocOr:
-                if len(res) < 2:
-                    raise Exception("недостаточно операндов")
-                op2 = res.pop()
-                op1 = res.pop()
-                res.append(op1 | op2)
+                case OperationCode.ocAverage:
+                    if not res:
+                        raise Exception("недостаточно операндов")
 
-            else:
-                raise Exception(f"неверный оператор: {opcode}")
+                    res.append(res.pop().dil())
+
+                case OperationCode.ocAnd:
+                    if len(res) < 2:
+                        raise Exception("недостаточно операндов")
+                    op2 = res.pop()
+                    op1 = res.pop()
+                    res.append(op1 & op2)
+
+                case OperationCode.ocOr:
+                    if len(res) < 2:
+                        raise Exception("недостаточно операндов")
+                    op2 = res.pop()
+                    op1 = res.pop()
+                    res.append(op1 | op2)
+
+                case _:
+                    raise Exception(f"неверный оператор: {opcode}")
 
         if len(res) != 1:
             raise Exception("неполное выражение")
@@ -358,63 +338,3 @@ class TLingVariable(TCustomVariable):
     def to_fcl(self, out=sys.stdout):
         """Выгрузка переменной в FCL файл"""
         out.write(str(self))
-
-
-# Для удобства создаем функции-фабрики
-def create_input_variable(name: str, inf: BaseSet, sup: BaseSet,
-                          fuzzify: FuzzifyMethod, ops: TOperationBase) -> TLingVariable:
-    """
-    Создание входной лингвистической переменной
-
-    Args:
-        name: имя переменной
-        inf: нижняя граница
-        sup: верхняя граница
-        fuzzify: метод фаззификации
-        ops: набор операций
-
-    Returns:
-        лингвистическая переменная
-    """
-    var = TLingVariable(name, inf, sup, ops, fuzzify, DefuzzifyMethod.dmCOG)
-    var.type = VariableType.vtInput
-    return var
-
-
-def create_output_variable(name: str, inf: BaseSet, sup: BaseSet,
-                           defuzzify: DefuzzifyMethod, ops: TOperationBase) -> TLingVariable:
-    """
-    Создание выходной лингвистической переменной
-
-    Args:
-        name: имя переменной
-        inf: нижняя граница
-        sup: верхняя граница
-        defuzzify: метод дефаззификации
-        ops: набор операций
-
-    Returns:
-        лингвистическая переменная
-    """
-    var = TLingVariable(name, inf, sup, ops, FuzzifyMethod.fmTriangle, defuzzify)
-    var.type = VariableType.vtOutput
-    return var
-
-
-def create_intermediate_variable(name: str, inf: BaseSet, sup: BaseSet,
-                                 ops: TOperationBase) -> TLingVariable:
-    """
-    Создание промежуточной лингвистической переменной
-
-    Args:
-        name: имя переменной
-        inf: нижняя граница
-        sup: верхняя граница
-        ops: набор операций
-
-    Returns:
-        лингвистическая переменная
-    """
-    var = TLingVariable(name, inf, sup, ops)
-    var.type = VariableType.vtIntermediate
-    return var

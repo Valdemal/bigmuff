@@ -25,10 +25,9 @@ def create_function_block(element: FCLElement, builder: Builder):
 
 
 def create_variable(element: FCLElement, builder: Builder):
-    v = TCustomVariable("")
     match builder.var_value_type:
         case ValueType.valNA:
-            v = TCustomVariable(builder.identifier)
+            raise Exception("Variable type is not valid")
         case ValueType.valFuzzy:
             v = TFuzzyVariable(builder.identifier,
                                TFuzzySet("", TMemberFuncLinear(float('-inf'), float('inf')), obMaxMin))
@@ -113,7 +112,7 @@ def set_in_var_param(element: FCLElement, builder: Builder):
     if idx == -1:
         raise Exception()
 
-    builder.current_var = builder.func_block.input(idx)
+    builder.current_var = builder.func_block.inputs[idx]
     builder.current_var.fuzzify = builder.fuzzify_method
     builder.current_var.units = builder.units
 
@@ -189,7 +188,7 @@ def set_out_var_param(element: FCLElement, builder: Builder):
     if idx == -1:
         raise Exception()
 
-    builder.current_var = builder.func_block.output(idx)
+    builder.current_var = builder.func_block.outputs[idx]
     builder.current_var.defuzzify = builder.defuzzify_method
     builder.current_var.units = builder.units
 

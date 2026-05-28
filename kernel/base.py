@@ -69,3 +69,15 @@ class TNeuroFuzzyBase:
     def owner(self, value: Optional['TNeuroFuzzyBase']):
         """Установить владельца объекта"""
         self._owner = value
+
+class Named:
+    def __init__(self, name: str):
+        self._name = name
+
+    @property
+    def name(self) -> str:
+        return self._name
+
+    @name.setter
+    def name(self, value: str):
+        self._name = value

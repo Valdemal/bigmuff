@@ -8,48 +8,33 @@ from typing import Optional, Union, Any
 from kernel.consts import DELTA_AMOUNT, CRISP_AMOUNT
 from kernel.enums import DefuzzifyMethod, FuzzifyMethod
 from kernel.exceptions import EFuzzySet, NFE_INVALID_BASE_SET
-from kernel.base import TNeuroFuzzyBase, MAX, MIN
+from kernel.base import TNeuroFuzzyBase, MAX, MIN, Named
 from kernel.member_func import TMemberFunc, RESULT_FUNC, TMemberFuncLinear, TMemberFuncSingle, TMemberFuncSmooth
+from kernel.member_func.linear import TMemberFuncTriangular, TMemberFuncTrapezoidal
 from kernel.operation import TOperationBase, TMaxMin
 
 
-class TFuzzySet(TNeuroFuzzyBase):
+class TFuzzySet(Named, TNeuroFuzzyBase):
     """
     Именованное нечеткое множество (терм лингвистической переменной)
     Используется для хранения термов лингвистических переменных
     """
 
-    def __init__(self, a_name: str, mf: Optional[TMemberFunc],
+    def __init__(self, name: str, mf: Optional[TMemberFunc],
                  a_ops: Optional[TOperationBase] = None):
         """
         Конструктор нечеткого множества
 
         Args:
-            a_name: имя нечеткого множества
+            name: имя нечеткого множества
             mf: функция принадлежности
             a_ops: набор базовых операций
         """
-        super().__init__()
+        super().__init__(name=name)
         self._fn = mf
         self._ops = a_ops if a_ops is not None else TMaxMin()
-        self._name_value = a_name
+        self._name = name
         self._is_learn = False
-
-    def __del__(self):
-        """Деструктор"""
-        # В Python сборщик мусора сам удалит объекты
-        # Но для совместимости оставляем
-        pass
-
-    @property
-    def name(self) -> str:
-        """Получить имя нечеткого множества"""
-        return self._name_value
-
-    @name.setter
-    def name(self, value: str):
-        """Установить имя нечеткого множества"""
-        self._name_value = value
 
     @property
     def learn(self) -> bool:
@@ -85,7 +70,7 @@ class TFuzzySet(TNeuroFuzzyBase):
         """Операция отрицания (~)"""
         # Создаем новый объект с измененным именем
         out = TFuzzySet(
-            f"not {self._name_value}",
+            f"not {self._name}",
             RESULT_FUNC(self._fn.inf, self._fn.sup, self._ops.points),
             self._ops
         )
@@ -99,17 +84,13 @@ class TFuzzySet(TNeuroFuzzyBase):
 
         return out
 
-    def __or__(self, other: Union['TFuzzySet', Any]) -> 'TFuzzySet':
+    def __or__(self, other: 'TFuzzySet') -> 'TFuzzySet':
         """Операция ИЛИ (|)"""
-        # Проверка на случай, если other - не TFuzzySet
-        if not isinstance(other, TFuzzySet):
-            raise TypeError(f"Cannot OR TFuzzySet with {type(other)}")
-
         if (other.func.inf != self._fn.inf) or (other.func.sup != self._fn.sup):
             raise EFuzzySet("", NFE_INVALID_BASE_SET)
 
         out = TFuzzySet(
-            f"({self._name_value} or {other.name})",
+            f"({self._name} or {other.name})",
             RESULT_FUNC(self._fn.inf, self._fn.sup, self._ops.points),
             self._ops
         )
@@ -123,17 +104,14 @@ class TFuzzySet(TNeuroFuzzyBase):
 
         return out
 
-    def __or__(self, other: Union['TFuzzySet', Any]) -> 'TFuzzySet':
-        """Операция ИЛИ (|) - композиция по ИЛИ"""
-        # todo двойной оператор
-        if not isinstance(other, TFuzzySet):
-            raise TypeError(f"Cannot OR TFuzzySet with {type(other)}")
+    def __add__(self, other: 'TFuzzySet') -> 'TFuzzySet':
+        """Композиция по ИЛИ"""
 
         if (other.func.inf != self._fn.inf) or (other.func.sup != self._fn.sup):
             raise EFuzzySet("", NFE_INVALID_BASE_SET)
 
         out = TFuzzySet(
-            f"({self._name_value} l_or {other.name})",
+            f"({self._name} l_or {other.name})",
             RESULT_FUNC(self._fn.inf, self._fn.sup, self._ops.points),
             self._ops
         )
@@ -147,16 +125,14 @@ class TFuzzySet(TNeuroFuzzyBase):
 
         return out
 
-    def __and__(self, other: Union['TFuzzySet', Any]) -> 'TFuzzySet':
+    def __and__(self, other: 'TFuzzySet') -> 'TFuzzySet':
         """Операция И (&)"""
-        if not isinstance(other, TFuzzySet):
-            raise TypeError(f"Cannot AND TFuzzySet with {type(other)}")
 
         if (other.func.inf != self._fn.inf) or (other.func.sup != self._fn.sup):
             raise EFuzzySet("", NFE_INVALID_BASE_SET)
 
         out = TFuzzySet(
-            f"({self._name_value} and {other.name})",
+            f"({self._name} and {other.name})",
             RESULT_FUNC(self._fn.inf, self._fn.sup, self._ops.points),
             self._ops
         )
@@ -170,17 +146,14 @@ class TFuzzySet(TNeuroFuzzyBase):
 
         return out
 
-    def __and__(self, other: Union['TFuzzySet', Any]) -> 'TFuzzySet':
-        # todo двойной оператор
-        """Операция И (&&) - композиция по И"""
-        if not isinstance(other, TFuzzySet):
-            raise TypeError(f"Cannot AND TFuzzySet with {type(other)}")
+    def __mul__(self, other: 'TFuzzySet') -> 'TFuzzySet':
+        """Композиция по И"""
 
         if (other.func.inf != self._fn.inf) or (other.func.sup != self._fn.sup):
             raise EFuzzySet("", NFE_INVALID_BASE_SET)
 
         out = TFuzzySet(
-            f"({self._name_value} l_and {other.name})",
+            f"({self._name} l_and {other.name})",
             RESULT_FUNC(self._fn.inf, self._fn.sup, self._ops.points),
             self._ops
         )
@@ -194,16 +167,14 @@ class TFuzzySet(TNeuroFuzzyBase):
 
         return out
 
-    def __ior__(self, other: Union['TFuzzySet', Any]) -> 'TFuzzySet':
+    def __ior__(self, other: 'TFuzzySet') -> 'TFuzzySet':
         """Операция ИЛИ с присваиванием (|=)"""
-        if not isinstance(other, TFuzzySet):
-            raise TypeError(f"Cannot OR-assign TFuzzySet with {type(other)}")
 
         if (other.func.inf != self._fn.inf) or (other.func.sup != self._fn.sup):
             raise EFuzzySet("", NFE_INVALID_BASE_SET)
 
         out_func = RESULT_FUNC(self._fn.inf, self._fn.sup, self._ops.points)
-        self._name_value = f"({self._name_value} or {other.name})"
+        self._name = f"({self._name} or {other.name})"
 
         val = self._fn.inf
         step = (self._fn.sup - self._fn.inf) / (self._ops.points - 1)
@@ -215,16 +186,14 @@ class TFuzzySet(TNeuroFuzzyBase):
         self._fn = out_func
         return self
 
-    def __iand__(self, other: Union['TFuzzySet', Any]) -> 'TFuzzySet':
+    def __iand__(self, other: 'TFuzzySet') -> 'TFuzzySet':
         """Операция И с присваиванием (&=)"""
-        if not isinstance(other, TFuzzySet):
-            raise TypeError(f"Cannot AND-assign TFuzzySet with {type(other)}")
 
         if (other.func.inf != self._fn.inf) or (other.func.sup != self._fn.sup):
             raise EFuzzySet("", NFE_INVALID_BASE_SET)
 
         out_func = RESULT_FUNC(self._fn.inf, self._fn.sup, self._ops.points)
-        self._name_value = f"({self._name_value} and {other.name})"
+        self._name = f"({self._name} and {other.name})"
 
         val = self._fn.inf
         step = (self._fn.sup - self._fn.inf) / (self._ops.points - 1)
@@ -242,7 +211,7 @@ class TFuzzySet(TNeuroFuzzyBase):
         Возводит степени принадлежности в квадрат
         """
         out = TFuzzySet(
-            f"con {self._name_value}",
+            f"con {self._name}",
             RESULT_FUNC(self._fn.inf, self._fn.sup, self._ops.points),
             self._ops
         )
@@ -262,7 +231,7 @@ class TFuzzySet(TNeuroFuzzyBase):
         Возводит степени принадлежности в степень 0.5
         """
         out = TFuzzySet(
-            f"dil {self._name_value}",
+            f"dil {self._name}",
             RESULT_FUNC(self._fn.inf, self._fn.sup, self._ops.points),
             self._ops
         )
@@ -293,14 +262,14 @@ class TFuzzySet(TNeuroFuzzyBase):
         if fuzzify == FuzzifyMethod.fmTriangle:
             p1 = MAX(self._fn.inf, crisp - delta)
             p2 = MIN(self._fn.sup, crisp + delta)
-            result = TMemberFuncLinear(p1, crisp, p2, 1.0, self._fn.inf, self._fn.sup)
+            result = TMemberFuncTriangular(p1, crisp, p2, 1.0, self._fn.inf, self._fn.sup)
 
         elif fuzzify == FuzzifyMethod.fmTrapezoid:
             p1 = MAX(self._fn.inf, crisp - delta - crdel)
             p2 = MAX(self._fn.inf, crisp - crdel)
             p3 = MIN(self._fn.sup, crisp + crdel)
             p4 = MIN(self._fn.sup, crisp + crdel + delta)
-            result = TMemberFuncLinear(p1, p2, p3, p4, 1.0, self._fn.inf, self._fn.sup)
+            result = TMemberFuncTrapezoidal(p1, p2, p3, p4, 1.0, self._fn.inf, self._fn.sup)
 
         elif fuzzify == FuzzifyMethod.fmSingleton:
             result = TMemberFuncSingle(crisp, 1.0, self._fn.inf, self._fn.sup)
@@ -320,7 +289,7 @@ class TFuzzySet(TNeuroFuzzyBase):
         else:
             raise ValueError(f"Unknown fuzzify method: {fuzzify}")
 
-        return TFuzzySet(self._name_value, result, self._ops)
+        return TFuzzySet(self._name, result, self._ops)
 
     def defuzzificate(self, defuzzify: DefuzzifyMethod) -> float:
         """
@@ -359,7 +328,7 @@ class TFuzzySet(TNeuroFuzzyBase):
             raise EFuzzySet("", NFE_INVALID_BASE_SET)
 
         out = TFuzzySet(
-            f"({self._name_value} aggr {fs.name})",
+            f"({self._name} aggr {fs.name})",
             RESULT_FUNC(self._fn.inf, self._fn.sup, self._ops.points),
             self._ops
         )
@@ -385,19 +354,3 @@ class TFuzzySet(TNeuroFuzzyBase):
     def to_fcl(self, out=sys.stdout):
         """Выгрузка терма в формат FCL"""
         out.write(str(self) + "\n")
-
-
-# Для обратной совместимости
-def create_fuzzy_set(name: str, mf: TMemberFunc, ops: TOperationBase = None) -> TFuzzySet:
-    """
-    Функция для создания нечеткого множества
-
-    Args:
-        name: имя множества
-        mf: функция принадлежности
-        ops: набор операций
-
-    Returns:
-        нечеткое множество
-    """
-    return TFuzzySet(name, mf, ops)

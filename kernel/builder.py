@@ -1,10 +1,11 @@
 from typing import List
 
 from kernel.block.function import TFunctionBlock
+from kernel.block.rule import TRuleBlock
 from kernel.consts import BaseSet, Natural, StdLingNames
 from kernel.enums import FuzzifyMethod, DefuzzifyMethod, VariableType, OperationCode
 from kernel.fuzzy_set import TFuzzySet
-from kernel.member_func.linear import TMemberFuncLinear
+from kernel.member_func.linear import TMemberFuncLinear, TMemberFuncBoundary
 from kernel.member_func.smooth import TMemberFuncSmooth
 from kernel.operation import TOperationBase
 from kernel.variables.ling import TLingVariable
@@ -63,21 +64,21 @@ def create_classify_block(
     for i in range(classes_count):
         var = TLingVariable(class_name[i], 0, 1, op_base, fuzz, defuzz)
         var.type = VariableType.vtOutput
-        var.add_term(TFuzzySet("соответсвует", TMemberFuncLinear(False, 0, 1, 0, 1), op_base))
+        var.add_term(TFuzzySet("соответсвует", TMemberFuncBoundary(False, 0, 1, 0, 1), op_base))
 
-        for j in range(len(var.term)):
-            var.term[i].learn = learn_out_mf
+        for j in range(len(var.terms)):
+            var.terms[i].learn = learn_out_mf
 
         block.add_output(var)
 
-    block.add_block("Main", op_base)
+    block.add_block(TRuleBlock("Main", op_base))
 
     return block
 
 def add_rules(block: TFunctionBlock,  learn: bool):
     # todo требуется переписать модуль с ген. алгоритмом
-    ant = [0] * block.input_count
-    ant_val = [[] for _ in range(block.input_count)]
+    ant = [0] * len(block.inputs)
+    ant_val = [[] for _ in range(len(block.inputs))]
 
     ant_comb = [OperationCode.ocValue, 0]
     ant[0] = 0

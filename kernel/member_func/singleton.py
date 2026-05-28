@@ -37,25 +37,25 @@ class TMemberFuncSingle(TMemberFunc):
 
     def cog(self, points: Natural) -> BaseSet:
         """Центр тяжести"""
-        return self._node[0].x
+        return self._nodes[0].x
 
     def coa(self, points: Natural) -> BaseSet:
         """Центр площади"""
-        return self._node[0].x
+        return self._nodes[0].x
 
     def lm(self, points: Natural) -> BaseSet:
         """Левый максимум"""
-        return self._node[0].x
+        return self._nodes[0].x
 
     def rm(self, points: Natural) -> BaseSet:
         """Правый максимум"""
-        return self._node[0].x
+        return self._nodes[0].x
 
     def mom(self, points: Natural) -> BaseSet:
         """Среднее максимумов"""
-        return self._node[0].x
+        return self._nodes[0].x
 
     def _get_value(self, value: BaseSet) -> Membership:
         """Получить значение функции принадлежности"""
-        return self._node[0].dom if EQ(value, self._node[0].x) else 0.0
+        return self._nodes[0].dom if EQ(value, self._nodes[0].x) else 0.0
 

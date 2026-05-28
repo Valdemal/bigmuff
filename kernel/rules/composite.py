@@ -6,39 +6,38 @@ from kernel.enums import OperationCode
 from kernel.exceptions import ECompositeRule, NFE_INVALID_CERT_VALUE, NFE_INVALID_EXPRESSION, ESimpleRule, \
     NFE_INVALID_INDEX, NFE_VAR_USED, NFE_INVALID_INPUTS
 from kernel.fuzzy_set import TFuzzySet
-from kernel.base import TNeuroFuzzyBase
+from kernel.base import TNeuroFuzzyBase, Named
 from kernel.member_func import RESULT_FUNC
 from kernel.operation import TOperationBase
 from kernel.rules.simple import TSimpleRule
 from kernel.variables.custom import TCustomVariable
 
 
-class TCompositeRule(TNeuroFuzzyBase):
+class TCompositeRule(Named, TNeuroFuzzyBase):
     """
     Реализует комплексное правило на n входов и n выходов
     используется вывод с декомпозицией
     """
 
-    def __init__(self, a_name: str, consequent: TCustomVariable,
+    def __init__(self, name: str, consequent: TCustomVariable,
                  cons_value: List[Natural], cert: float, a_ops: TOperationBase):
         """
         Конструктор композитного правила
 
         Args:
-            a_name: имя правила
+            name: имя правила
             consequent: переменная консеквента
             cons_value: выражение консеквента
             cert: степень доверия
             a_ops: базовые операции
         """
-        super().__init__()
+        super().__init__(name=name)
         self._cons = consequent
         self._cons_val = cons_value.copy()
         self._certainty = cert
         self._ops = a_ops
-        self._name_value = a_name
         self._is_learn = False
-        self._rule: List[TSimpleRule] = []
+        self._rules: List[TSimpleRule] = []
         self._rule_expr: List[Natural] = []
 
         # Проверка корректности консеквента
@@ -46,21 +45,6 @@ class TCompositeRule(TNeuroFuzzyBase):
 
         if self._certainty < 0.0 or self._certainty > 1.0:
             raise ECompositeRule("", NFE_INVALID_CERT_VALUE)
-
-    def __del__(self):
-        """Деструктор"""
-        # В Python не нужно явно удалять объекты
-        pass
-
-    @property
-    def name(self) -> str:
-        """Получить имя правила"""
-        return self._name_value
-
-    @name.setter
-    def name(self, value: str):
-        """Установить имя правила"""
-        self._name_value = value
 
     @property
     def cons_value(self) -> List[Natural]:
@@ -71,11 +55,11 @@ class TCompositeRule(TNeuroFuzzyBase):
     def cons_value(self, value: List[Natural]):
         """Установить выражение консеквента"""
         try:
-            for r in self._rule:
+            for r in self._rules:
                 r.cons_value = value
             self._cons_val = value.copy()
         except Exception:
-            for r in self._rule:
+            for r in self._rules:
                 r.cons_value = self._cons_val
             raise
 
@@ -98,7 +82,7 @@ class TCompositeRule(TNeuroFuzzyBase):
                 if opcode == OperationCode.ocValue:
                     val = value[i]
                     i += 1
-                    if val >= len(self._rule):
+                    if val >= len(self._rules):
                         raise Exception("неверный индекс входной переменной правила")
                     res += 1
                 elif opcode == OperationCode.ocNot:
@@ -119,6 +103,10 @@ class TCompositeRule(TNeuroFuzzyBase):
             raise ECompositeRule(str(e), NFE_INVALID_EXPRESSION)
 
     @property
+    def rules(self) -> List[TSimpleRule]:
+        return self._rules
+
+    @property
     def certainty(self) -> float:
         """Получить степень доверия"""
         return self._certainty
@@ -129,7 +117,7 @@ class TCompositeRule(TNeuroFuzzyBase):
         if value < 0.0 or value > 1.0:
             raise ESimpleRule("", NFE_INVALID_CERT_VALUE)
         self._certainty = value
-        for r in self._rule:
+        for r in self._rules:
             r.certainty = value
 
     @property
@@ -157,7 +145,7 @@ class TCompositeRule(TNeuroFuzzyBase):
         """
         r = TSimpleRule(antecedent, ant_value, self._cons,
                         self._cons_val, self._certainty, self._ops)
-        self._rule.append(r)
+        self._rules.append(r)
 
     def del_in_var(self, index: Natural):
         """
@@ -166,13 +154,13 @@ class TCompositeRule(TNeuroFuzzyBase):
         Args:
             index: индекс удаляемой переменной
         """
-        if index >= len(self._rule):
+        if index >= len(self._rules):
             raise ECompositeRule("", NFE_INVALID_INDEX)
 
         if self.is_input_var_used(index):
             raise ECompositeRule("", NFE_VAR_USED)
 
-        del self._rule[index]
+        del self._rules[index]
 
     def is_input_var_used(self, index: Natural) -> bool:
         """
@@ -200,11 +188,11 @@ class TCompositeRule(TNeuroFuzzyBase):
         Returns:
             выходное нечеткое множество
         """
-        if len(in_sets) != len(self._rule):
+        if len(in_sets) != len(self._rules):
             raise ECompositeRule("", NFE_INVALID_INPUTS)
 
         # Получение результатов по всем правилам
-        out = [self._rule[i].evaluate(in_sets[i]) for i in range(len(self._rule))]
+        out = [self._rules[i].evaluate(in_sets[i]) for i in range(len(self._rules))]
 
         # Композиция всех выводов правил
         res: List[TFuzzySet] = []
@@ -219,7 +207,7 @@ class TCompositeRule(TNeuroFuzzyBase):
                     val = self._rule_expr[i]
                     i += 1
 
-                    if val >= len(self._rule):
+                    if val >= len(self._rules):
                         raise Exception("неверный индекс входной переменной правила")
 
                     op = out[val]
@@ -263,7 +251,7 @@ class TCompositeRule(TNeuroFuzzyBase):
 
     def prepare(self):
         """Подготовка правила к работе"""
-        for r in self._rule:
+        for r in self._rules:
             r.prepare()
 
     def is_input_term_used(self, invar: Natural, index: Natural) -> bool:
@@ -277,10 +265,10 @@ class TCompositeRule(TNeuroFuzzyBase):
         Returns:
             True если используется
         """
-        if invar >= len(self._rule):
+        if invar >= len(self._rules):
             return False
 
-        val = self._rule[invar].ant_value
+        val = self._rules[invar].ant_value
         for i in range(len(val) - 1):
             if val[i] == OperationCode.ocValue and val[i + 1] == index:
                 return True
@@ -301,7 +289,6 @@ class TCompositeRule(TNeuroFuzzyBase):
                     self._cons_val[i + 1] == index):
                 return True
         return False
-
     # def __str__(self) -> str:
     #     """
     #     Выгрузка правила в FCL файл
@@ -366,19 +353,7 @@ class TCompositeRule(TNeuroFuzzyBase):
     #
     #     return result
 
+
     def to_fcl(self, out=sys.stdout):
         """Выгрузка правила в FCL файл"""
         out.write(str(self) + "\n")
-
-
-
-def create_composite_rule(name: str, consequent: TCustomVariable,
-                          cons_value: List[Natural], cert: float,
-                          ops: TOperationBase) -> TCompositeRule:
-    """
-    Создание композитного правила
-
-    Returns:
-        объект композитного правила
-    """
-    return TCompositeRule(name, consequent, cons_value, cert, ops)

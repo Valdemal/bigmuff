@@ -18,7 +18,7 @@ class TFuzzyVariable(TCustomVariable):
     Нечеткая переменная (с одним нечетким множеством)
     """
 
-    def __init__(self, a_name: str, a_fs: Optional[TFuzzySet] = None,
+    def __init__(self, name: str, a_fs: Optional[TFuzzySet] = None,
                  a_type: Optional[VariableType] = None,
                  a_fmethod: Optional[FuzzifyMethod] = None,
                  a_dfmethod: Optional[DefuzzifyMethod] = None):
@@ -26,16 +26,16 @@ class TFuzzyVariable(TCustomVariable):
         Конструктор нечеткой переменной
 
         Args:
-            a_name: имя переменной
+            name: имя переменной
             a_fs: нечеткое множество
             a_type: тип переменной
             a_fmethod: метод фаззификации
             a_dfmethod: метод дефаззификации
         """
         if a_fmethod is not None and a_dfmethod is not None:
-            super().__init__(a_name, a_fmethod, a_dfmethod)
+            super().__init__(name, a_fmethod, a_dfmethod)
         else:
-            super().__init__(a_name)
+            super().__init__(name)
 
         self._fs = a_fs
 
@@ -88,9 +88,7 @@ class TFuzzyVariable(TCustomVariable):
         Returns:
             нечеткое множество
         """
-        if self._fs:
-            return self._fs.fuzzificate(crisp, self._fuzzify)
-        return None
+        return self._fs.fuzzificate(crisp, self._fuzzify)
 
     def _internal_defuzzificate(self, value: Optional[TFuzzySet]) -> float:
         """
@@ -121,53 +119,49 @@ class TFuzzyVariable(TCustomVariable):
         """
         res: List[TFuzzySet] = []
 
-        try:
-            i = 0
-            while i < len(revform):
-                opcode = revform[i]
+        i = 0
+        while i < len(revform):
+            opcode = revform[i]
+            i += 1
+
+            if opcode == OperationCode.ocValue:
+                val = revform[i]
                 i += 1
 
-                if opcode == OperationCode.ocValue:
-                    val = revform[i]
-                    i += 1
+                if val != 0:
+                    raise Exception("в нечеткой переменной только 1 терм")
 
-                    if val != 0:
-                        raise Exception("в нечеткой переменной только 1 терм")
+                res.append(TFuzzySet(
+                    "Value",
+                    RESULT_FUNC(self._fs.func.inf, self._fs.func.sup, self._fs.ops.points),
+                    self._fs.ops
+                ))
 
-                    res.append(TFuzzySet(
-                        "Value",
-                        RESULT_FUNC(self._fs.func.inf, self._fs.func.sup, self._fs.ops.points),
-                        self._fs.ops
-                    ))
+            elif opcode == OperationCode.ocNot:
+                if not res:
+                    raise Exception("недостаточно операндов")
 
-                elif opcode == OperationCode.ocNot:
-                    if not res:
-                        raise Exception("недостаточно операндов")
-                    op = res.pop()
-                    res.append(~op)
+                res.append(~res.pop())
 
-                elif opcode == OperationCode.ocVery:
-                    if not res:
-                        raise Exception("недостаточно операндов")
-                    op = res.pop()
-                    res.append(op.con())
+            elif opcode == OperationCode.ocVery:
+                if not res:
+                    raise Exception("недостаточно операндов")
+                op = res.pop()
+                res.append(op.con())
 
-                elif opcode == OperationCode.ocAverage:
-                    if not res:
-                        raise Exception("недостаточно операндов")
-                    op = res.pop()
-                    res.append(op.dil())
+            elif opcode == OperationCode.ocAverage:
+                if not res:
+                    raise Exception("недостаточно операндов")
+                op = res.pop()
+                res.append(op.dil())
 
-                else:
-                    raise Exception(f"неверный оператор: {opcode}")
+            else:
+                raise Exception(f"неверный оператор: {opcode}")
 
-            if len(res) != 1:
-                raise Exception("неполное выражение")
+        if len(res) != 1:
+            raise Exception("неполное выражение")
 
-            return res[0]
-
-        except Exception as e:
-            raise EFuzzyVariable(str(e), NFE_INVALID_EXPRESSION)
+        return res[0]
 
     def is_value_exists(self, value: str) -> bool:
         """
@@ -240,52 +234,3 @@ class TFuzzyVariable(TCustomVariable):
         """Выгрузка переменной в FCL файл"""
         out.write(str(self))
 
-
-# Для удобства создаем функции-фабрики
-def create_fuzzy_input_variable(name: str, fs: TFuzzySet,
-                                fuzzify: FuzzifyMethod) -> TFuzzyVariable:
-    """
-    Создание входной нечеткой переменной
-
-    Args:
-        name: имя переменной
-        fs: нечеткое множество
-        fuzzify: метод фаззификации
-
-    Returns:
-        нечеткая переменная
-    """
-    var = TFuzzyVariable(name, fs, VariableType.vtInput, fuzzify, DefuzzifyMethod.dmCOG)
-    return var
-
-
-def create_fuzzy_output_variable(name: str, fs: TFuzzySet,
-                                 defuzzify: DefuzzifyMethod) -> TFuzzyVariable:
-    """
-    Создание выходной нечеткой переменной
-
-    Args:
-        name: имя переменной
-        fs: нечеткое множество
-        defuzzify: метод дефаззификации
-
-    Returns:
-        нечеткая переменная
-    """
-    var = TFuzzyVariable(name, fs, VariableType.vtOutput, FuzzifyMethod.fmTriangle, defuzzify)
-    return var
-
-
-def create_fuzzy_intermediate_variable(name: str, fs: TFuzzySet) -> TFuzzyVariable:
-    """
-    Создание промежуточной нечеткой переменной
-
-    Args:
-        name: имя переменной
-        fs: нечеткое множество
-
-    Returns:
-        нечеткая переменная
-    """
-    var = TFuzzyVariable(name, fs, VariableType.vtIntermediate)
-    return var

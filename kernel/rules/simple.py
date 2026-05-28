@@ -46,10 +46,13 @@ class TSimpleRule(TNeuroFuzzyBase):
         if self._certainty < 0.0 or self._certainty > 1.0:
             raise ESimpleRule("", NFE_INVALID_CERT_VALUE)
 
-    def __del__(self):
-        """Деструктор"""
-        # В Python не нужно явно удалять объекты
-        pass
+    @property
+    def ant(self):
+        return self._ant
+
+    @property
+    def cons(self):
+        return self._cons
 
     @property
     def ant_value(self) -> List[Natural]:
@@ -185,16 +188,3 @@ class TSimpleRule(TNeuroFuzzyBase):
                     self._cons_value[i + 1] == index):
                 return True
         return False
-
-
-def create_simple_rule(antecedent: TCustomVariable, ant_value: List[Natural],
-                       consequent: TCustomVariable, cons_value: List[Natural],
-                       cert: float, ops: TOperationBase) -> TSimpleRule:
-    """
-    Создание простого правила
-
-    Returns:
-        объект простого правила
-    """
-    return TSimpleRule(antecedent, ant_value, consequent, cons_value, cert, ops)
-

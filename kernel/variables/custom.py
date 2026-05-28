@@ -5,27 +5,26 @@ from typing import Optional, List
 from kernel.enums import FuzzifyMethod, DefuzzifyMethod, ValueType, VariableType
 from kernel.exceptions import EFuzzyVariable, NFE_INVALID_FUZZIFY_METHOD, NFE_INVALID_DEFUZZIFY_METHOD
 from kernel.fuzzy_set import TFuzzySet
-from kernel.base import TNeuroFuzzyBase
+from kernel.base import TNeuroFuzzyBase, Named
 from kernel.operation import TOperationBase
 
 
-class TCustomVariable(TNeuroFuzzyBase, ABC):
+class TCustomVariable(Named, TNeuroFuzzyBase, ABC):
     """
     Базовый класс для нечеткой переменной
     """
 
-    def __init__(self, a_name: str, a_fmethod: Optional[FuzzifyMethod] = None,
+    def __init__(self, name: str, a_fmethod: Optional[FuzzifyMethod] = None,
                  a_dfmethod: Optional[DefuzzifyMethod] = None):
         """
         Конструктор базового класса переменной
 
         Args:
-            a_name: имя переменной
+            name: имя переменной
             a_fmethod: метод фаззификации
             a_dfmethod: метод дефаззификации
         """
-        super().__init__()
-        self._name = a_name
+        super().__init__(name=name)
         self._value_type = ValueType.valNA
         self._type = VariableType.vtNA
         self._units = ""
@@ -40,11 +39,7 @@ class TCustomVariable(TNeuroFuzzyBase, ABC):
         else:
             self._defuzzify = DefuzzifyMethod.dmNA
 
-    @property
-    def name(self) -> str:
-        """Получить имя переменной"""
-        return self._name
-
+    @abstractmethod
     def value(self, revform: List[int]) -> Optional[TFuzzySet]:
         pass
 
@@ -56,11 +51,13 @@ class TCustomVariable(TNeuroFuzzyBase, ABC):
     def ops(self, value: TOperationBase):
         pass
 
+    @abstractmethod
     def is_value_exists(self, value: str) -> bool:
-        return False
+        pass
 
+    @abstractmethod
     def is_term_exists(self, term: str) -> int:
-        return -1
+        pass
 
     @property
     def value_type(self) -> ValueType:
@@ -138,6 +135,7 @@ class TCustomVariable(TNeuroFuzzyBase, ABC):
             raise EFuzzyVariable(self._name, NFE_INVALID_DEFUZZIFY_METHOD)
         return self._internal_defuzzificate(value)
 
+    @abstractmethod
     def _internal_fuzzificate(self, crisp: float) -> Optional['TFuzzySet']:
         """
         Внутренняя фаззификация (должен быть переопределен)
@@ -148,8 +146,9 @@ class TCustomVariable(TNeuroFuzzyBase, ABC):
         Returns:
             нечеткое множество
         """
-        return None
+        pass
 
+    @abstractmethod
     def _internal_defuzzificate(self, value: Optional['TFuzzySet']) -> float:
         """
         Внутренняя дефаззификация (должен быть переопределен)
@@ -160,10 +159,7 @@ class TCustomVariable(TNeuroFuzzyBase, ABC):
         Returns:
             четкое значение
         """
-        if value is not None:
-            return value.defuzzificate(self._defuzzify)
-
-        return float('-inf')
+        pass
 
     # def __str__(self) -> str:
     #     """
