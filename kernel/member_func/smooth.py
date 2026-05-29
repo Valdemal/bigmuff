@@ -74,20 +74,6 @@ class TMemberFuncSmooth(TMemberFunc):
         result.add_node(TNodeValue(a_sup if left_shoulder else a_inf, 0.0, result))
         return result
 
-    def __copy__(self) -> 'TMemberFuncSmooth':
-        """Конструктор копирования"""
-        result = TMemberFuncSmooth(self._inf_base, self._sup_base)
-        result._nodes = self._nodes.copy()
-        result._type = self._type
-        return result
-
-    def __deepcopy__(self, memo) -> 'TMemberFuncSmooth':
-        """Глубокое копирование"""
-        result = TMemberFuncSmooth(self._inf_base, self._sup_base)
-        result._nodes = [TNodeValue(n.x, n.dom, result) for n in self._nodes]
-        result._type = self._type
-        return result
-
     def is_nodes(self) -> bool:
         """Функция представлена опорными точками"""
         return True

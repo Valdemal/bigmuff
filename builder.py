@@ -119,7 +119,7 @@ class Builder:
                 self._current_func.add_node(TNodeValue(self._x, self._y))
             case MemberFuncType.mfLnVector:
                 idx = self._x * (len(self._current_func.data) - 1) // (self._current_func.sup - self._current_func.inf)
-                self._current_func[idx] = self._y
+                self._current_func.data[idx] = self._y
 
     def set_var_type(self, var_type: VariableType):
         self.var_type = var_type

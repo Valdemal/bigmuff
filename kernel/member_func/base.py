@@ -51,7 +51,6 @@ class TMemberFunc(TNeuroFuzzyBase, ABC):
         """Получить верхнюю границу базового множества"""
         return self._sup_base
 
-
     @sup.setter
     def sup(self, value: BaseSet):
         """Установить верхнюю границу базового множества"""
@@ -66,7 +65,7 @@ class TMemberFunc(TNeuroFuzzyBase, ABC):
         return self._nodes
 
     @property
-    def data(self):
+    def data(self) -> List[Membership]:
         return self._data
 
     @property
@@ -93,12 +92,6 @@ class TMemberFunc(TNeuroFuzzyBase, ABC):
             True если представлена вектором
         """
         return False
-
-    def __getitem__(self, index: Natural) -> Membership:
-        return self._data[index]
-
-    def __setitem__(self, key, value):
-        self._data[key] = value
 
     def __call__(self, value: BaseSet) -> Membership:
         """
@@ -186,7 +179,6 @@ class TMemberFunc(TNeuroFuzzyBase, ABC):
                 self._nodes[i].x = self._sup_base
             elif LS(self._nodes[i].x, self._inf_base):
                 self._nodes[i].x = self._inf_base
-
 
     @abstractmethod
     def _get_value(self, value: BaseSet) -> Membership:
@@ -346,32 +338,3 @@ class TMemberFunc(TNeuroFuzzyBase, ABC):
         elif self.is_vector():
             for i in range(len(self._data)):
                 self._data[i] = 1.0 - self._data[i]
-
-    def __str__(self) -> str:
-        """
-        Выгрузка функции принадлежности в формат FCL
-
-        Returns:
-            строка в формате FCL
-        """
-        result = f"{MemberFuncTypeName.get(self._type, 'UNKNOWN')} "
-
-        if self.is_nodes():
-            for i in range(len(self._nodes)):
-                result += str(self._nodes[i]) + " "
-        elif self.is_vector():
-            x = self._inf_base
-            if len(self._data) > 1:
-                step = (self._sup_base - self._inf_base) / (len(self._data) - 1)
-            else:
-                step = 0
-
-            for i in range(len(self._data)):
-                result += f"({x}, {self._data[i]}) "
-                x += step
-
-        return result
-
-    def to_fcl(self, out=sys.stdout):
-        """Выгрузка функции принадлежности в поток"""
-        out.write(str(self))

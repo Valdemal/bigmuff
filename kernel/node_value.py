@@ -2,14 +2,12 @@
 Модуль для работы с узловыми точками функции принадлежности
 """
 
-import sys
 from typing import Optional
 
+from .base import TNeuroFuzzyBase, INRANGE, EPSILON
 from .consts import BaseSet, Membership
 from .exceptions import EMemberFunc, NFE_DOM_INVALID, NFE_OUT_OF_DOMAIN
 from .member_func.base import TMemberFunc
-from .base import TNeuroFuzzyBase, INRANGE, EPSILON
-
 
 
 class TNodeValue(TNeuroFuzzyBase):
@@ -18,8 +16,8 @@ class TNodeValue(TNeuroFuzzyBase):
     """
 
     def __init__(self,
-                 x_value: Optional[BaseSet] = None,
-                 y_value: Optional[Membership] = None,
+                 x_value: Optional[BaseSet] = 0,
+                 y_value: Optional[Membership] = 0,
                  a_owner: Optional['TMemberFunc'] = None):
         """
         Конструктор узловой точки
@@ -30,33 +28,18 @@ class TNodeValue(TNeuroFuzzyBase):
             a_owner: владелец (функция принадлежности)
         """
         # todo проблемный конструктор
+        super().__init__(a_owner)
+        self._x_value = x_value
+        self._y_value = y_value
 
-        # Вызов конструктора родительского класса
+        # Проверка значения степени принадлежности
+        if self._y_value < 0.0 or self._y_value > 1.0:
+            raise EMemberFunc("", NFE_DOM_INVALID)
+
+        # Проверка нахождения в области определения (если есть владелец)
         if a_owner is not None:
-            super().__init__(a_owner)
-        else:
-            super().__init__()
-
-        # Инициализация полей
-        self._x_value: BaseSet = 0.0
-        self._y_value: Membership = 0.0
-
-        # Обработка различных вариантов вызова конструктора
-        if x_value is not None and y_value is not None:
-            self._x_value = x_value
-            self._y_value = y_value
-
-            # Проверка значения степени принадлежности
-            if self._y_value < 0.0 or self._y_value > 1.0:
-                raise EMemberFunc("", NFE_DOM_INVALID)
-
-            # Проверка нахождения в области определения (если есть владелец)
-            if a_owner is not None:
-                if not INRANGE(self._x_value, a_owner.inf, a_owner.sup):
-                    raise EMemberFunc("", NFE_OUT_OF_DOMAIN)
-        elif x_value is not None or y_value is not None:
-            # Если передан только один параметр - ошибка
-            raise ValueError("Both x_value and y_value must be provided or both None")
+            if not INRANGE(self._x_value, a_owner.inf, a_owner.sup):
+                raise EMemberFunc("", NFE_OUT_OF_DOMAIN)
 
     @property
     def x(self) -> BaseSet:
@@ -85,14 +68,6 @@ class TNodeValue(TNeuroFuzzyBase):
             raise EMemberFunc("", NFE_DOM_INVALID)
         self._y_value = value
 
-    def __copy__(self) -> 'TNodeValue':
-        """Оператор копирования"""
-        return TNodeValue(self._x_value, self._y_value, self.owner)
-
-    def __deepcopy__(self, memo) -> 'TNodeValue':
-        """Глубокое копирование"""
-        return TNodeValue(self._x_value, self._y_value, self.owner)
-
     def __eq__(self, other: object) -> bool:
         """Оператор сравнения на равенство"""
         if not isinstance(other, TNodeValue):
@@ -101,32 +76,9 @@ class TNodeValue(TNeuroFuzzyBase):
                 abs(self._y_value - other._y_value) < EPSILON and
                 self.owner == other.owner)
 
-    def __repr__(self) -> str:
-        """Строковое представление для отладки"""
-        return f"TNodeValue(x={self._x_value}, dom={self._y_value}, owner={self.owner})"
-
     def __str__(self) -> str:
         """Строковое представление в формате FCL"""
         return f"({self._x_value}, {self._y_value})"
-
-    def to_fcl(self) -> str:
-        """
-        Выгрузка точки в формат FCL
-
-        Returns:
-            строка в формате FCL
-        """
-        return f"({self._x_value}, {self._y_value})"
-
-    # Для обратной совместимости с оператором >> из C++
-    def stream_out(self, out=sys.stdout):
-        """
-        Вывод точки в поток (аналог operator>> из C++)
-
-        Args:
-            out: объект, поддерживающий write (по умолчанию sys.stdout)
-        """
-        out.write(str(self))
 
 
 # Вспомогательный класс для работы с точками
@@ -203,15 +155,3 @@ class TNodeValueList:
             if self._points[i].x < self._points[i-1].x:
                 return False
         return True
-
-    def to_fcl(self) -> str:
-        """
-        Преобразовать все точки в формат FCL
-
-        Returns:
-            строка в формате FCL
-        """
-        return " ".join(point.to_fcl() for point in self._points)
-
-    def __str__(self) -> str:
-        return self.to_fcl()

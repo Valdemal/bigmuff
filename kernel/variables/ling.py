@@ -1,10 +1,9 @@
-import sys
 from typing import Optional, List
 
 from .custom import TCustomVariable
 from ..base import GE, LS
 from ..consts import BaseSet, Natural
-from ..enums import FuzzifyMethod, DefuzzifyMethod, ValueType, OperationCode, VariableType
+from ..enums import FuzzifyMethod, DefuzzifyMethod, ValueType, OperationCode
 from ..exceptions import ELingVariable, NFE_INVALID_BASE, NFE_INVALID_INDEX, NFE_INVALID_BASE_SET
 from ..fuzzy_set import TFuzzySet
 from ..member_func import RESULT_FUNC
@@ -170,6 +169,7 @@ class TLingVariable(TCustomVariable):
         """
         if value is not None:
             return value.defuzzificate(self._defuzzify)
+
         return float('-inf')
 
 
@@ -276,65 +276,3 @@ class TLingVariable(TCustomVariable):
             raise Exception("неполное выражение")
 
         return res[0]
-
-        # except Exception as e:
-        #     raise ELingVariable(str(e), NFE_INVALID_EXPRESSION)
-
-    # def __str__(self) -> str:
-    #     """
-    #     Выгрузка переменной в FCL файл
-    #
-    #     Returns:
-    #         строка в формате FCL
-    #     """
-    #     result = ""
-    #
-    #     if self.type == VariableType.vtInput:
-    #         result += f"{FuzzifyToken[0]} {self.name}\n"
-    #         result += f"{IdentToken}{MethodToken}: {FuzzifyMethodName.get(self.fuzzify, 'UNKNOWN')} ;\n"
-    #         result += f"{IdentToken}"
-    #
-    #         if self.units:
-    #             result += f"{UnitsToken}: \"{self.units}\" ;\n{IdentToken}"
-    #
-    #         result += f"{RangeToken} := ({self._inf_base} .. {self._sup_base}) ;\n"
-    #
-    #         for t in self._term:
-    #             result += f"{IdentToken}{t}\n"
-    #
-    #         result += FuzzifyToken[1]
-    #
-    #     elif self.type == VariableType.vtOutput:
-    #         result += f"{DeFuzzifyToken[0]} {self.name}\n"
-    #         result += f"{IdentToken}{MethodToken}: {DeFuzzifyMethodName.get(self.defuzzify, 'UNKNOWN')} ;\n"
-    #         result += f"{IdentToken}"
-    #
-    #         if self.units:
-    #             result += f"{UnitsToken}: \"{self.units}\" ;\n{IdentToken}"
-    #
-    #         result += f"{RangeToken} := ({self._inf_base} .. {self._sup_base}) ;\n"
-    #
-    #         for t in self._term:
-    #             result += f"{IdentToken}{t}\n"
-    #
-    #         result += DeFuzzifyToken[1]
-    #
-    #     elif self.type == VariableType.vtIntermediate:
-    #         result += f"{IntermediateToken[0]} {self.name}\n"
-    #         result += f"{IdentToken}"
-    #
-    #         if self.units:
-    #             result += f"{UnitsToken}: \"{self.units}\" ;\n{IdentToken}"
-    #
-    #         result += f"{RangeToken} := ({self._inf_base} .. {self._sup_base}) ;\n"
-    #
-    #         for t in self._term:
-    #             result += f"{IdentToken}{t}\n"
-    #
-    #         result += IntermediateToken[1]
-    #
-    #     return result
-
-    def to_fcl(self, out=sys.stdout):
-        """Выгрузка переменной в FCL файл"""
-        out.write(str(self))

@@ -49,10 +49,6 @@ class TMemberFuncLnVect(TMemberFunc):
         """Функция представлена как массив"""
         return True
 
-    def data(self, index: Natural) -> Membership:
-        """Получить значение вектора по индексу"""
-        return self._data[index]
-
     def __setitem__(self, index: Natural, value: Membership):
         """Установить значение вектора"""
         if 0 <= index < len(self._data):

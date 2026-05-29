@@ -71,7 +71,7 @@ def member_func_to_fcl(func: TMemberFunc):
     elif func.is_vector():
         x = func.inf
         if len(func.data) > 1:
-            step = (func.sup - func.inf) / (len(func._data) - 1)
+            step = (func.sup - func.inf) / (len(func.data) - 1)
         else:
             step = 0
 

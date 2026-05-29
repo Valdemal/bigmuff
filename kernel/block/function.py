@@ -140,8 +140,7 @@ class TFunctionBlock(Named, TNeuroFuzzyBase):
         for i in range(1, len(self._blocks)):
             res = self._blocks[i].evaluate(inp)
             for j in range(len(self._outputs)):
-                tmp = out[j].aggregate(res[j])
-                out[j] = tmp
+                out[j] = out[j].aggregate(res[j])
 
             res.clear()
 

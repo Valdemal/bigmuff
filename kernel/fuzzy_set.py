@@ -79,7 +79,7 @@ class TFuzzySet(Named, TNeuroFuzzyBase):
         step = (self._fn.sup - self._fn.inf) / (self._ops.points - 1)
 
         for i in range(self._ops.points):
-            out.func[i] = self._ops.not_op(self._fn(val))
+            out.func.data[i] = self._ops.not_op(self._fn(val))
             val += step
 
         return out
@@ -99,7 +99,7 @@ class TFuzzySet(Named, TNeuroFuzzyBase):
         step = (self._fn.sup - self._fn.inf) / (self._ops.points - 1)
 
         for i in range(self._ops.points):
-            out.func[i] = self._ops.t_conorm(self._fn(val), other.func(val))
+            out.func.data[i] = self._ops.t_conorm(self._fn(val), other.func(val))
             val += step
 
         return out
@@ -120,7 +120,7 @@ class TFuzzySet(Named, TNeuroFuzzyBase):
         step = (self._fn.sup - self._fn.inf) / (self._ops.points - 1)
 
         for i in range(self._ops.points):
-            out.func[i] = self._ops.comp_or(self._fn(val), other.func(val))
+            out.func.data[i] = self._ops.comp_or(self._fn(val), other.func(val))
             val += step
 
         return out
@@ -141,7 +141,7 @@ class TFuzzySet(Named, TNeuroFuzzyBase):
         step = (self._fn.sup - self._fn.inf) / (self._ops.points - 1)
 
         for i in range(self._ops.points):
-            out.func[i] = self._ops.t_norm(self._fn(val), other.func(val))
+            out.func.data[i] = self._ops.t_norm(self._fn(val), other.func(val))
             val += step
 
         return out
@@ -162,7 +162,7 @@ class TFuzzySet(Named, TNeuroFuzzyBase):
         step = (self._fn.sup - self._fn.inf) / (self._ops.points - 1)
 
         for i in range(self._ops.points):
-            out.func[i] = self._ops.comp_and(self._fn(val), other.func(val))
+            out.func.data[i] = self._ops.comp_and(self._fn(val), other.func(val))
             val += step
 
         return out
@@ -220,7 +220,7 @@ class TFuzzySet(Named, TNeuroFuzzyBase):
         step = (self._fn.sup - self._fn.inf) / (self._ops.points - 1)
 
         for i in range(self._ops.points):
-            out.func[i] = self._ops.pow(self._fn(val), 2.0)
+            out.func.data[i] = self._ops.pow(self._fn(val), 2.0)
             val += step
 
         return out
@@ -240,7 +240,7 @@ class TFuzzySet(Named, TNeuroFuzzyBase):
         step = (self._fn.sup - self._fn.inf) / (self._ops.points - 1)
 
         for i in range(self._ops.points):
-            out.func[i] = self._ops.pow(self._fn(val), 0.5)
+            out.func.data[i] = self._ops.pow(self._fn(val), 0.5)
             val += step
 
         return out
@@ -337,20 +337,8 @@ class TFuzzySet(Named, TNeuroFuzzyBase):
         step = (self._fn.sup - self._fn.inf) / (self._ops.points - 1)
 
         for i in range(self._ops.points):
-            out.func[i] = self._ops.rule_comp(self._fn(val), fs.func(val))
+            # тут везде 0
+            out.func.data[i] = self._ops.rule_comp(self._fn(val), fs.func(val))
             val += step
 
         return out
-
-    # def __str__(self) -> str:
-    #     """Строковое представление в формате FCL"""
-    #     result = f"{TermToken} {self._name_value} := "
-    #     result += str(self._fn)
-    #     if self._is_learn:
-    #         result += f" {LearnToken} "
-    #     result += ";"
-    #     return result
-
-    def to_fcl(self, out=sys.stdout):
-        """Выгрузка терма в формат FCL"""
-        out.write(str(self) + "\n")
