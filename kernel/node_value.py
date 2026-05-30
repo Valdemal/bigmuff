@@ -27,7 +27,6 @@ class TNodeValue(TNeuroFuzzyBase):
             y_value: степень принадлежности (y координата)
             a_owner: владелец (функция принадлежности)
         """
-        # todo проблемный конструктор
         super().__init__(a_owner)
         self._x_value = x_value
         self._y_value = y_value

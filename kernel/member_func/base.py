@@ -68,6 +68,20 @@ class TMemberFunc(TNeuroFuzzyBase, ABC):
     def data(self) -> List[Membership]:
         return self._data
 
+    def __setitem__(self, index: Natural, value: Membership):
+        """Установить значение вектора"""
+        if self.is_nodes():
+            self._nodes[index].dom = value
+        elif self.is_vector():
+            self._data[index] = value
+
+    def __getitem__(self, index: Natural) -> Membership:
+        """Получить значение вектора"""
+        if self.is_nodes():
+            return self._nodes[index].dom
+        elif self.is_vector():
+            return self._data[index]
+
     @property
     def type(self) -> MemberFuncType:
         """Получить тип функции принадлежности"""
@@ -168,9 +182,10 @@ class TMemberFunc(TNeuroFuzzyBase, ABC):
         Returns:
             индекс в векторе
         """
-        if len(self._data) <= 1:
-            return 0
-        return int((value - self._inf_base) * (len(self._data) - 1) / (self._sup_base - self._inf_base))
+        # todo inspect here
+        return int(
+            (value - self._inf_base) * (len(self._data) - 1) / (self._sup_base - self._inf_base)
+        )
 
     def _adjust_nodes(self):
         """Привести узловые точки в соответствие с границами"""

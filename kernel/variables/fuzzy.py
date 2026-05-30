@@ -106,7 +106,7 @@ class TFuzzyVariable(TCustomVariable):
             return self._fs.defuzzificate(self._defuzzify)
         return float('-inf')
 
-    def value(self, revform: List[int]) -> Optional[TFuzzySet]:
+    def value(self, revform: List[int]) -> TFuzzySet:
         """
         Получение композитного значения нечеткой переменной
         Выражение записывается в обратной польской записи
@@ -133,7 +133,7 @@ class TFuzzyVariable(TCustomVariable):
 
                 res.append(TFuzzySet(
                     "Value",
-                    RESULT_FUNC(self._fs.func.inf, self._fs.func.sup, self._fs.ops.points),
+                    RESULT_FUNC(self._fs.func, self._fs.ops.points),
                     self._fs.ops
                 ))
 

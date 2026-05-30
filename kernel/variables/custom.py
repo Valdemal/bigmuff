@@ -40,7 +40,7 @@ class TCustomVariable(Named, TNeuroFuzzyBase, ABC):
             self._defuzzify = DefuzzifyMethod.dmNA
 
     @abstractmethod
-    def value(self, revform: List[int]) -> Optional[TFuzzySet]:
+    def value(self, revform: List[int]) -> TFuzzySet:
         pass
 
     @property

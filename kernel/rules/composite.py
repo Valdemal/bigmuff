@@ -192,7 +192,8 @@ class TCompositeRule(Named, TNeuroFuzzyBase):
             raise ECompositeRule("", NFE_INVALID_INPUTS)
 
         # Получение результатов по всем правилам
-        out = [self._rules[i].evaluate(in_sets[i]) for i in range(len(self._rules))]
+        # todo везде нули в функциях принадлжености
+        out = [rule.evaluate(in_set) for rule, in_set in zip(self._rules, in_sets)]
 
         # Композиция всех выводов правил
         res: List[TFuzzySet] = []
@@ -213,7 +214,8 @@ class TCompositeRule(Named, TNeuroFuzzyBase):
                     op = out[val]
                     res.append(TFuzzySet(
                         "",
-                        RESULT_FUNC(op.func.inf, op.func.sup, op.ops.points),
+                        # RESULT_FUNC(op.func.inf, op.func.sup, op.ops.points),
+                        RESULT_FUNC(op.func, op.ops.points),
                         op.ops
                     ))
 

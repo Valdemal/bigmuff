@@ -28,6 +28,7 @@ class TSimpleRule(TNeuroFuzzyBase):
             cert: степень доверия к правилу
             a_ops: базовые операции
         """
+        # todo отдельная структрутура для антецедента и консеквента
         super().__init__()
         self._certainty = cert
         self._ops = a_ops
@@ -62,14 +63,10 @@ class TSimpleRule(TNeuroFuzzyBase):
     @ant_value.setter
     def ant_value(self, value: List[Natural]):
         """Установить выражение антецедента"""
-        try:
-            self._ant = self._ant_var.value(value)
-            self._ant.name = f"{self._ant_var.name} IS {self._ant.name}"
-            self._ant_value = value.copy()
-        except Exception:
-            self._ant = self._ant_var.value(self._ant_value)
-            self._ant.name = f"{self._ant_var.name} IS {self._ant.name}"
-            raise
+        self._ant = self._ant_var.value(value)
+        self._ant.name = f"{self._ant_var.name} IS {self._ant.name}"
+        self._ant_value = value.copy()
+
 
     @property
     def cons_value(self) -> List[Natural]:
@@ -79,14 +76,10 @@ class TSimpleRule(TNeuroFuzzyBase):
     @cons_value.setter
     def cons_value(self, value: List[Natural]):
         """Установить выражение консеквента"""
-        try:
-            self._cons = self._cons_var.value(value)
-            self._cons.name = f"{self._cons_var.name} IS {self._cons.name}"
-            self._cons_value = value.copy()
-        except Exception:
-            self._cons = self._cons_var.value(self._cons_value)
-            self._cons.name = f"{self._cons_var.name} IS {self._cons.name}"
-            raise
+        self._cons = self._cons_var.value(value)
+        self._cons.name = f"{self._cons_var.name} IS {self._cons.name}"
+        self._cons_value = value.copy()
+
 
     @property
     def certainty(self) -> float:
@@ -110,40 +103,30 @@ class TSimpleRule(TNeuroFuzzyBase):
         Returns:
             выходное нечеткое множество
         """
-        ant_fn = self._ant.func
-        cons_fn = self._cons.func
-        in_fn = in_set.func
-
-        if (in_fn.inf != ant_fn.inf) or (in_fn.sup != ant_fn.sup):
+        if (in_set.func.inf != self._ant.func.inf) or (in_set.func.sup != self._ant.func.sup):
             raise ESimpleRule("", NFE_INVALID_BASE)
 
         # Создаем выходное нечеткое множество
-        out = TFuzzySet(
-            "",
-            RESULT_FUNC(cons_fn.inf, cons_fn.sup, self._ops.points),
-            self._ops
-        )
-        out_fn = out.func
-
-        step_x = (ant_fn.sup - ant_fn.inf) / (self._ops.points - 1)
-        step_y = (cons_fn.sup - cons_fn.inf) / (self._ops.points - 1)
+        out = TFuzzySet("", RESULT_FUNC(self._cons.func, self._ops.points), self._ops)
+        step_x = (self._ant.func.sup - self._ant.func.inf) / (self._ops.points - 1)
+        step_y = (self._cons.func.sup - self._cons.func.inf) / (self._ops.points - 1)
 
         i = 0
-        y = cons_fn.inf
-        while LE(y, cons_fn.sup):
-            val_y = cons_fn(y)
+        y = self._cons.func.inf
+        while LE(y, self._cons.func.sup):
+            val_y = self._cons.func(y)
             max_val = 0.0
 
-            x = ant_fn.inf
-            while LE(x, ant_fn.sup):
-                impl_res = self._ops.impl(ant_fn(x), val_y)
+            x = self._ant.func.inf
+            while LE(x, self._ant.func.sup):
+                impl_res = self._ops.impl(self._ant.func(x), val_y)
                 max_val = self._ops.t_conorm(
-                    self._ops.t_norm(in_fn(x), impl_res),
+                    self._ops.t_norm(in_set.func(x), impl_res),
                     max_val
                 )
                 x += step_x
 
-            out_fn[i] = self._certainty * max_val
+            out.func[i] = self._certainty * max_val
             i += 1
             y += step_y
 

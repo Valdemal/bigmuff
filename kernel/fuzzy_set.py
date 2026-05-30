@@ -2,14 +2,13 @@
 Модуль для работы с нечеткими множествами (термами)
 """
 
-import sys
-from typing import Optional, Union, Any
+from typing import Optional
 
+from kernel.base import TNeuroFuzzyBase, MAX, MIN, Named
 from kernel.consts import DELTA_AMOUNT, CRISP_AMOUNT
 from kernel.enums import DefuzzifyMethod, FuzzifyMethod
 from kernel.exceptions import EFuzzySet, NFE_INVALID_BASE_SET
-from kernel.base import TNeuroFuzzyBase, MAX, MIN, Named
-from kernel.member_func import TMemberFunc, RESULT_FUNC, TMemberFuncLinear, TMemberFuncSingle, TMemberFuncSmooth
+from kernel.member_func import TMemberFunc, RESULT_FUNC, TMemberFuncSingle, TMemberFuncSmooth
 from kernel.member_func.linear import TMemberFuncTriangular, TMemberFuncTrapezoidal
 from kernel.operation import TOperationBase, TMaxMin
 
@@ -71,7 +70,7 @@ class TFuzzySet(Named, TNeuroFuzzyBase):
         # Создаем новый объект с измененным именем
         out = TFuzzySet(
             f"not {self._name}",
-            RESULT_FUNC(self._fn.inf, self._fn.sup, self._ops.points),
+            RESULT_FUNC(self._fn, self._ops.points),
             self._ops
         )
 
@@ -79,7 +78,7 @@ class TFuzzySet(Named, TNeuroFuzzyBase):
         step = (self._fn.sup - self._fn.inf) / (self._ops.points - 1)
 
         for i in range(self._ops.points):
-            out.func.data[i] = self._ops.not_op(self._fn(val))
+            out.func[i] = self._ops.not_op(self._fn(val))
             val += step
 
         return out
@@ -91,7 +90,7 @@ class TFuzzySet(Named, TNeuroFuzzyBase):
 
         out = TFuzzySet(
             f"({self._name} or {other.name})",
-            RESULT_FUNC(self._fn.inf, self._fn.sup, self._ops.points),
+            RESULT_FUNC(self._fn, self._ops.points),
             self._ops
         )
 
@@ -99,7 +98,7 @@ class TFuzzySet(Named, TNeuroFuzzyBase):
         step = (self._fn.sup - self._fn.inf) / (self._ops.points - 1)
 
         for i in range(self._ops.points):
-            out.func.data[i] = self._ops.t_conorm(self._fn(val), other.func(val))
+            out.func[i] = self._ops.t_conorm(self._fn(val), other.func(val))
             val += step
 
         return out
@@ -112,7 +111,7 @@ class TFuzzySet(Named, TNeuroFuzzyBase):
 
         out = TFuzzySet(
             f"({self._name} l_or {other.name})",
-            RESULT_FUNC(self._fn.inf, self._fn.sup, self._ops.points),
+            RESULT_FUNC(self._fn, self._ops.points),
             self._ops
         )
 
@@ -120,7 +119,7 @@ class TFuzzySet(Named, TNeuroFuzzyBase):
         step = (self._fn.sup - self._fn.inf) / (self._ops.points - 1)
 
         for i in range(self._ops.points):
-            out.func.data[i] = self._ops.comp_or(self._fn(val), other.func(val))
+            out.func[i] = self._ops.comp_or(self._fn(val), other.func(val))
             val += step
 
         return out
@@ -133,7 +132,7 @@ class TFuzzySet(Named, TNeuroFuzzyBase):
 
         out = TFuzzySet(
             f"({self._name} and {other.name})",
-            RESULT_FUNC(self._fn.inf, self._fn.sup, self._ops.points),
+            RESULT_FUNC(self._fn, self._ops.points),
             self._ops
         )
 
@@ -141,7 +140,7 @@ class TFuzzySet(Named, TNeuroFuzzyBase):
         step = (self._fn.sup - self._fn.inf) / (self._ops.points - 1)
 
         for i in range(self._ops.points):
-            out.func.data[i] = self._ops.t_norm(self._fn(val), other.func(val))
+            out.func[i] = self._ops.t_norm(self._fn(val), other.func(val))
             val += step
 
         return out
@@ -154,7 +153,7 @@ class TFuzzySet(Named, TNeuroFuzzyBase):
 
         out = TFuzzySet(
             f"({self._name} l_and {other.name})",
-            RESULT_FUNC(self._fn.inf, self._fn.sup, self._ops.points),
+            RESULT_FUNC(self._fn, self._ops.points),
             self._ops
         )
 
@@ -162,7 +161,7 @@ class TFuzzySet(Named, TNeuroFuzzyBase):
         step = (self._fn.sup - self._fn.inf) / (self._ops.points - 1)
 
         for i in range(self._ops.points):
-            out.func.data[i] = self._ops.comp_and(self._fn(val), other.func(val))
+            out.func[i] = self._ops.comp_and(self._fn(val), other.func(val))
             val += step
 
         return out
@@ -173,7 +172,7 @@ class TFuzzySet(Named, TNeuroFuzzyBase):
         if (other.func.inf != self._fn.inf) or (other.func.sup != self._fn.sup):
             raise EFuzzySet("", NFE_INVALID_BASE_SET)
 
-        out_func = RESULT_FUNC(self._fn.inf, self._fn.sup, self._ops.points)
+        out_func = RESULT_FUNC(self._fn, self._ops.points)
         self._name = f"({self._name} or {other.name})"
 
         val = self._fn.inf
@@ -192,7 +191,7 @@ class TFuzzySet(Named, TNeuroFuzzyBase):
         if (other.func.inf != self._fn.inf) or (other.func.sup != self._fn.sup):
             raise EFuzzySet("", NFE_INVALID_BASE_SET)
 
-        out_func = RESULT_FUNC(self._fn.inf, self._fn.sup, self._ops.points)
+        out_func = RESULT_FUNC(self._fn, self._ops.points)
         self._name = f"({self._name} and {other.name})"
 
         val = self._fn.inf
@@ -212,7 +211,7 @@ class TFuzzySet(Named, TNeuroFuzzyBase):
         """
         out = TFuzzySet(
             f"con {self._name}",
-            RESULT_FUNC(self._fn.inf, self._fn.sup, self._ops.points),
+            RESULT_FUNC(self._fn, self._ops.points),
             self._ops
         )
 
@@ -220,7 +219,7 @@ class TFuzzySet(Named, TNeuroFuzzyBase):
         step = (self._fn.sup - self._fn.inf) / (self._ops.points - 1)
 
         for i in range(self._ops.points):
-            out.func.data[i] = self._ops.pow(self._fn(val), 2.0)
+            out.func[i] = self._ops.pow(self._fn(val), 2.0)
             val += step
 
         return out
@@ -232,7 +231,7 @@ class TFuzzySet(Named, TNeuroFuzzyBase):
         """
         out = TFuzzySet(
             f"dil {self._name}",
-            RESULT_FUNC(self._fn.inf, self._fn.sup, self._ops.points),
+            RESULT_FUNC(self._fn, self._ops.points),
             self._ops
         )
 
@@ -240,7 +239,7 @@ class TFuzzySet(Named, TNeuroFuzzyBase):
         step = (self._fn.sup - self._fn.inf) / (self._ops.points - 1)
 
         for i in range(self._ops.points):
-            out.func.data[i] = self._ops.pow(self._fn(val), 0.5)
+            out.func[i] = self._ops.pow(self._fn(val), 0.5)
             val += step
 
         return out
@@ -329,7 +328,7 @@ class TFuzzySet(Named, TNeuroFuzzyBase):
 
         out = TFuzzySet(
             f"({self._name} aggr {fs.name})",
-            RESULT_FUNC(self._fn.inf, self._fn.sup, self._ops.points),
+            RESULT_FUNC(self._fn, self._ops.points),
             self._ops
         )
 
@@ -337,8 +336,7 @@ class TFuzzySet(Named, TNeuroFuzzyBase):
         step = (self._fn.sup - self._fn.inf) / (self._ops.points - 1)
 
         for i in range(self._ops.points):
-            # тут везде 0
-            out.func.data[i] = self._ops.rule_comp(self._fn(val), fs.func(val))
+            out.func[i] = self._ops.rule_comp(self._fn(val), fs.func(val))
             val += step
 
         return out

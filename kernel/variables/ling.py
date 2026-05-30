@@ -203,7 +203,7 @@ class TLingVariable(TCustomVariable):
                 return i
         return -1
 
-    def value(self, revform: List[int]) -> Optional[TFuzzySet]:
+    def value(self, revform: List[int]) -> TFuzzySet:
         """
         Получение композитного значения нечеткой переменной
         Выражение записывается в обратной польской записи
@@ -216,7 +216,6 @@ class TLingVariable(TCustomVariable):
         """
         res: List[TFuzzySet] = []
 
-        # todo check here:
         i = 0
         while i < len(revform):
             opcode = revform[i]
@@ -233,9 +232,14 @@ class TLingVariable(TCustomVariable):
                     op = self._terms[val]
                     res.append(TFuzzySet(
                         op.name,
-                        RESULT_FUNC(op.func.inf, op.func.sup, op.ops.points),
-                        op.ops
+                        RESULT_FUNC(op.func, op.ops.points)
                     ))
+                    # todo здесь шляпа
+                    # res.append(TFuzzySet(
+                    #     op.name,
+                    #     RESULT_FUNC(op.func.inf, op.func.sup, op.ops.points),
+                    #     op.ops
+                    # ))
 
                 case OperationCode.ocNot:
                     if not res:
