@@ -1,7 +1,7 @@
-from kernel.consts import BaseSet, Membership, Natural
+from kernel.comparison import gt, eq, ls
+from kernel.consts import Crisp, Membership, Natural
 from kernel.enums import MemberFuncType
 from kernel.member_func.base import TMemberFunc
-from kernel.base import GT, EQ, LS, GE, LE
 from kernel.node_value import TNodeValue
 
 
@@ -22,8 +22,8 @@ class TMemberFuncSmooth(TMemberFunc):
             self.append_node(TNodeValue(a_inf, 0.0, self))
             self.append_node(TNodeValue(a_sup, 0.0, self))
 
-    def bell(self, a: BaseSet, b: BaseSet, c: BaseSet, h: Membership,
-             a_inf: BaseSet, a_sup: BaseSet) -> 'TMemberFuncSmooth':
+    def bell(self, a: Crisp, b: Crisp, c: Crisp, h: Membership,
+             a_inf: Crisp, a_sup: Crisp) -> 'TMemberFuncSmooth':
         """Колоколообразная функция"""
         result = TMemberFuncSmooth.__new__(TMemberFuncSmooth)
         super(TMemberFuncSmooth, result).__init__(a_inf, a_sup)
@@ -35,8 +35,8 @@ class TMemberFuncSmooth(TMemberFunc):
         result.append_node(TNodeValue(a_sup, 0.0, result))
         return result
 
-    def gaussian(self, mean: BaseSet, deriv: BaseSet, h: Membership,
-                 a_inf: BaseSet, a_sup: BaseSet) -> 'TMemberFuncSmooth':
+    def gaussian(self, mean: Crisp, deriv: Crisp, h: Membership,
+                 a_inf: Crisp, a_sup: Crisp) -> 'TMemberFuncSmooth':
         """Гауссоподобная функция"""
         result = TMemberFuncSmooth.__new__(TMemberFuncSmooth)
         super(TMemberFuncSmooth, result).__init__(a_inf, a_sup)
@@ -48,8 +48,8 @@ class TMemberFuncSmooth(TMemberFunc):
         result.append_node(TNodeValue(a_sup, 0.0, result))
         return result
 
-    def smooth_trapezoid(self, a: BaseSet, b: BaseSet, c: BaseSet, d: BaseSet,
-                         h: Membership, a_inf: BaseSet, a_sup: BaseSet) -> 'TMemberFuncSmooth':
+    def smooth_trapezoid(self, a: Crisp, b: Crisp, c: Crisp, d: Crisp,
+                         h: Membership, a_inf: Crisp, a_sup: Crisp) -> 'TMemberFuncSmooth':
         """Сглаженная трапеция"""
         result = TMemberFuncSmooth.__new__(TMemberFuncSmooth)
         super(TMemberFuncSmooth, result).__init__(a_inf, a_sup)
@@ -62,8 +62,8 @@ class TMemberFuncSmooth(TMemberFunc):
         result.append_node(TNodeValue(a_sup, 0.0, result))
         return result
 
-    def shoulder(self, left_shoulder: bool, min_val: BaseSet, max_val: BaseSet,
-                 a_inf: BaseSet, a_sup: BaseSet) -> 'TMemberFuncSmooth':
+    def shoulder(self, left_shoulder: bool, min_val: Crisp, max_val: Crisp,
+                 a_inf: Crisp, a_sup: Crisp) -> 'TMemberFuncSmooth':
         """Сглаженные краевые значения"""
         result = TMemberFuncSmooth.__new__(TMemberFuncSmooth)
         super(TMemberFuncSmooth, result).__init__(a_inf, a_sup)
@@ -82,58 +82,59 @@ class TMemberFuncSmooth(TMemberFunc):
         """Функция представлена как массив"""
         return False
 
-    def lm(self, points: Natural) -> BaseSet:
+    def lm(self, points: Natural) -> Crisp:
         """Левый максимум"""
         max_val = 0.0
         x_max = self._inf_base
 
         for n in self._nodes:
-            if GT(n.dom, max_val):
+            if gt(n.dom, max_val):
                 max_val = n.dom
                 x_max = n.x
 
         return x_max
 
-    def rm(self, points: Natural) -> BaseSet:
+    def rm(self, points: Natural) -> Crisp:
         """Правый максимум"""
         max_val = 0.0
         x_max = self._sup_base
 
         for n in reversed(self._nodes):
-            if GT(n.dom, max_val):
+            if gt(n.dom, max_val):
                 max_val = n.dom
                 x_max = n.x
 
         return x_max
 
-    def mom(self, points: Natural) -> BaseSet:
+    def mom(self, points: Natural) -> Crisp:
         """Среднее максимумов"""
         max_val = 0.0
         x_start = self._inf_base
         x_end = self._inf_base
 
         for n in self._nodes:
-            if GT(n.dom, max_val):
+            if gt(n.dom, max_val):
                 max_val = n.dom
                 x_start = n.x
                 x_end = n.x
-            if EQ(n.dom, max_val):
+
+            if eq(n.dom, max_val):
                 x_end = n.x
 
         return (x_end - x_start) / 2.0
 
-    def _get_value(self, value: BaseSet) -> Membership:
+    def _get_value(self, value: Crisp) -> Membership:
         """
         Получить значение функции принадлежности (гладкая интерполяция)
         Используется S-образная интерполяция
         """
         last = len(self._nodes) - 1
 
-        if LS(value, self._nodes[0].x) or GT(value, self._nodes[last].x):
+        if ls(value, self._nodes[0].x) or gt(value, self._nodes[last].x):
             return 0.0
 
         i = 0
-        while i <= last and GE(value, self._nodes[i].x):
+        while i <= last and gt(value, self._nodes[i].x):
             i += 1
 
         x1 = self._nodes[i - 1].x
@@ -141,14 +142,14 @@ class TMemberFuncSmooth(TMemberFunc):
         y1 = self._nodes[i - 1].dom
         y2 = self._nodes[i].dom
 
-        if EQ(value, x2):
+        if eq(value, x2):
             return y2
 
         # S-образная интерполяция
         mid = (x1 + x2) / 2.0
         t = (value - x1) / (x2 - x1)
 
-        if LE(value, mid):
+        if ls(value, mid):
             # Первая половина: квадратичная интерполяция от y1 к y2
             return y1 + 2 * (y2 - y1) * t * t
         else:

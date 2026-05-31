@@ -6,11 +6,11 @@ import math
 from abc import ABC, abstractmethod
 from typing import Optional
 
-from .base import MIN, MAX, LE
+from .comparison import le
 from .consts import Natural, Membership
 
 
-class TOperationBase(ABC):
+class OperationBase(ABC):
     """
     Базовый класс для операций над нечеткими множествами.
     Реализует базис операций
@@ -150,7 +150,7 @@ class TOperationBase(ABC):
         pass
 
 
-class TMaxMin(TOperationBase):
+class MaxMin(OperationBase):
     """
     Максиминный базис с композицией по минимуму
     """
@@ -160,11 +160,11 @@ class TMaxMin(TOperationBase):
 
     def t_norm(self, op1: Membership, op2: Membership) -> Membership:
         """Т-норма = минимум"""
-        return MIN(op1, op2)
+        return min(op1, op2)
 
     def t_conorm(self, op1: Membership, op2: Membership) -> Membership:
         """Т-конорма = максимум"""
-        return MAX(op1, op2)
+        return max(op1, op2)
 
     def not_op(self, op: Membership) -> Membership:
         """Отрицание = 1 - op"""
@@ -172,26 +172,26 @@ class TMaxMin(TOperationBase):
 
     def impl(self, op1: Membership, op2: Membership) -> Membership:
         """Импликация = минимум"""
-        return MIN(op1, op2)
+        return min(op1, op2)
 
     def comp_and(self, op1: Membership, op2: Membership) -> Membership:
         """Композиция И = минимум"""
-        return MIN(op1, op2)
+        return min(op1, op2)
 
     def comp_or(self, op1: Membership, op2: Membership) -> Membership:
         """Композиция ИЛИ = максимум"""
-        return MAX(op1, op2)
+        return max(op1, op2)
 
     def rule_comp(self, op1: Membership, op2: Membership) -> Membership:
         """Композиция правил = максимум"""
-        return MAX(op1, op2)
+        return max(op1, op2)
 
     @property
     def name(self) -> str:
         return "MAXMIN"
 
 
-class TSumProd(TOperationBase):
+class SumProd(OperationBase):
     """
     Гладкий базис сумма-умножение с композицией по минимуму
     """
@@ -232,7 +232,7 @@ class TSumProd(TOperationBase):
         return "SUMPROD"
 
 
-class TLukasiewicz(TMaxMin):
+class TLukasiewicz(MaxMin):
     """
     Логическая система Лукасевича
     """
@@ -242,26 +242,26 @@ class TLukasiewicz(TMaxMin):
 
     def impl(self, op1: Membership, op2: Membership) -> Membership:
         """Импликация Лукасевича = min(1, 1 - op1 + op2)"""
-        return MIN(1.0, 1.0 - op1 + op2)
+        return min(1.0, 1.0 - op1 + op2)
 
     def comp_and(self, op1: Membership, op2: Membership) -> Membership:
         """Композиция И = максимум"""
-        return MAX(op1, op2)
+        return max(op1, op2)
 
     def comp_or(self, op1: Membership, op2: Membership) -> Membership:
         """Композиция ИЛИ = минимум"""
-        return MIN(op1, op2)
+        return min(op1, op2)
 
     def rule_comp(self, op1: Membership, op2: Membership) -> Membership:
         """Композиция правил = минимум"""
-        return MIN(op1, op2)
+        return min(op1, op2)
 
     @property
     def name(self) -> str:
         return "LUKASIEWICZ"
 
 
-class TKDLogic(TMaxMin):
+class TKDLogic(MaxMin):
     """
     KD - логика
     """
@@ -271,26 +271,26 @@ class TKDLogic(TMaxMin):
 
     def impl(self, op1: Membership, op2: Membership) -> Membership:
         """Импликация KD = max(1 - op1, op2)"""
-        return MAX(1.0 - op1, op2)
+        return max(1.0 - op1, op2)
 
     def comp_and(self, op1: Membership, op2: Membership) -> Membership:
         """Композиция И = максимум"""
-        return MAX(op1, op2)
+        return max(op1, op2)
 
     def comp_or(self, op1: Membership, op2: Membership) -> Membership:
         """Композиция ИЛИ = минимум"""
-        return MIN(op1, op2)
+        return min(op1, op2)
 
     def rule_comp(self, op1: Membership, op2: Membership) -> Membership:
         """Композиция правил = минимум"""
-        return MIN(op1, op2)
+        return min(op1, op2)
 
     @property
     def name(self) -> str:
         return "KD_LOGIC"
 
 
-class TZ2Logic(TMaxMin):
+class TZ2Logic(MaxMin):
     """
     Z2 - логика
     """
@@ -300,26 +300,26 @@ class TZ2Logic(TMaxMin):
 
     def impl(self, op1: Membership, op2: Membership) -> Membership:
         """Импликация Z2"""
-        return 1.0 if LE(op1, op2) else MAX(1.0 - op1, op2)
+        return 1.0 if le(op1, op2) else max(1.0 - op1, op2)
 
     def comp_and(self, op1: Membership, op2: Membership) -> Membership:
         """Композиция И = максимум"""
-        return MAX(op1, op2)
+        return max(op1, op2)
 
     def comp_or(self, op1: Membership, op2: Membership) -> Membership:
         """Композиция ИЛИ = минимум"""
-        return MIN(op1, op2)
+        return min(op1, op2)
 
     def rule_comp(self, op1: Membership, op2: Membership) -> Membership:
         """Композиция правил = минимум"""
-        return MIN(op1, op2)
+        return min(op1, op2)
 
     @property
     def name(self) -> str:
         return "Z2_LOGIC"
 
 
-class TZ3Logic(TMaxMin):
+class TZ3Logic(MaxMin):
     """
     Z3 - логика
     """
@@ -329,7 +329,7 @@ class TZ3Logic(TMaxMin):
 
     def impl(self, op1: Membership, op2: Membership) -> Membership:
         """Импликация Z3"""
-        if LE(op1, op2):
+        if le(op1, op2):
             return 1.0
         # Защита от деления на ноль
         denominator = 1.0 - op2 + op1
@@ -339,15 +339,15 @@ class TZ3Logic(TMaxMin):
 
     def comp_and(self, op1: Membership, op2: Membership) -> Membership:
         """Композиция И = максимум"""
-        return MAX(op1, op2)
+        return max(op1, op2)
 
     def comp_or(self, op1: Membership, op2: Membership) -> Membership:
         """Композиция ИЛИ = минимум"""
-        return MIN(op1, op2)
+        return min(op1, op2)
 
     def rule_comp(self, op1: Membership, op2: Membership) -> Membership:
         """Композиция правил = минимум"""
-        return MIN(op1, op2)
+        return min(op1, op2)
 
     @property
     def name(self) -> str:
@@ -355,55 +355,10 @@ class TZ3Logic(TMaxMin):
 
 
 # Создаем глобальные экземпляры для каждой логической системы
-obMaxMin = TMaxMin()
-obSumProd = TSumProd()
+obMaxMin = MaxMin()
+obSumProd = SumProd()
 obLukasiewicz = TLukasiewicz()
 obKDLogic = TKDLogic()
 obZ2Logic = TZ2Logic()
 obZ3Logic = TZ3Logic()
 
-
-def get_operation_base_object(index: int) -> Optional[TOperationBase]:
-    """
-    Получить объект операций по индексу
-
-    Args:
-        index: индекс операции (0-5)
-
-    Returns:
-        объект операции или None если индекс неверный
-    """
-    operations = {
-        0: obMaxMin,
-        1: obSumProd,
-        2: obLukasiewicz,
-        3: obKDLogic,
-        4: obZ2Logic,
-        5: obZ3Logic
-    }
-    return operations.get(index)
-
-
-def get_operation_base_index(obj: TOperationBase) -> int:
-    """
-    Получить индекс объекта операций
-
-    Args:
-        obj: объект операции
-
-    Returns:
-        индекс операции (0-5) или -1 если объект не найден
-    """
-    # Создаем словарь для сравнения по имени класса
-    # Используем type(obj).__name__ для определения типа
-    operation_classes = {
-        "TMaxMin": 0,
-        "TSumProd": 1,
-        "TLukasiewicz": 2,
-        "TKDLogic": 3,
-        "TZ2Logic": 4,
-        "TZ3Logic": 5
-    }
-
-    class_name = type(obj).__name__
-    return operation_classes.get(class_name, -1)

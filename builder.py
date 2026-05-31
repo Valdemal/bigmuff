@@ -1,19 +1,20 @@
-from pygments.lexers import q
+from errno import ECANCELED
 
-from kernel.block.function import TFunctionBlock
-from kernel.block.rule import TRuleBlock
-from kernel.consts import BaseSet
+from kernel.blocks import FunctionalBlock, RuleBlock
+from kernel.consts import Crisp
+from kernel.containers.evaluatedvar import EvaluatedVar
 from kernel.enums import VariableType, ValueType, FuzzifyMethod, DefuzzifyMethod, MemberFuncType
 from kernel.fuzzy_set import TFuzzySet
 from kernel.member_func import TMemberFunc, TMemberFuncSingle, TMemberFuncLinear, TMemberFuncSmooth, TMemberFuncLnVect
 from kernel.node_value import TNodeValue
-from kernel.operation import obMaxMin, TOperationBase
+from kernel.operation import obMaxMin, OperationBase
+from kernel.rules import CompositeRule
 from kernel.variables.custom import TCustomVariable
 
 
 class Builder:
     def __init__(self):
-        self._func_block = TFunctionBlock("Без названия")
+        self._func_block = FunctionalBlock("Без названия")
         # todo вынести в класс транслятора
         self._identifier = ""
         self._string_literal = ""
@@ -27,8 +28,8 @@ class Builder:
         self._fuzzify_method: FuzzifyMethod | None = None
         self._defuzzify_method: DefuzzifyMethod | None = None
         self._units: str = ""
-        self.infinum: BaseSet = 0
-        self.supremum: BaseSet = 0
+        self.infinum: Crisp = 0
+        self.supremum: Crisp = 0
         self._learning = False
 
         # рассматриваемая функция принадлежности
@@ -40,9 +41,9 @@ class Builder:
         self._y = 0
 
         # Рассматриваемый блок правил
-        self._oper_base: TOperationBase | None = None
+        self._oper_base: OperationBase | None = None
         self.certainty = 1
-        self.current_rules: TRuleBlock | None = None
+        self.current_rules: RuleBlock | None = None
 
 
         # Выражения правила
@@ -119,7 +120,7 @@ class Builder:
                 self._current_func.add_node(TNodeValue(self._x, self._y))
             case MemberFuncType.mfLnVector:
                 idx = self._x * (len(self._current_func.data) - 1) // (self._current_func.sup - self._current_func.inf)
-                self._current_func.data[idx] = self._y
+                self._current_func[idx] = self._y
 
     def set_var_type(self, var_type: VariableType):
         self.var_type = var_type
@@ -197,17 +198,21 @@ class Builder:
         self._points = value
 
     def create_rule_block(self):
-        new_index = self.func_block.add_block(
-            TRuleBlock(self.identifier, self.oper_base)
+        self.func_block.blocks.append(
+            RuleBlock(self.identifier, self.func_block, self.oper_base)
         )
-        self.current_rules = self.func_block.blocks[new_index]
+        self.current_rules = self.func_block.blocks[-1]
 
     def create_rule(self):
-        i = self.current_rules.add_rule(
-            self.rule_name, self.antecedent, self.ant_value, self.consequent, self.cons_value, self.ant_comb,
-            self.certainty
+        rule = CompositeRule(
+            self.rule_name,
+            EvaluatedVar(self.func_block.outputs[self.consequent],self.cons_value),
+            self.certainty, self.current_rules.ops
         )
-        self.current_rules.rule(i).learn = self._learning
+        i = self.current_rules.add_rule(
+            rule, self.antecedent, self.ant_value, self.ant_comb, self.consequent
+        )
+        self.current_rules.rules[i].learn = self._learning
         self._learning = False
         self.certainty = 1
         self.antecedent.clear()

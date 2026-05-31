@@ -1,49 +1,36 @@
 """
 Модуль для работы с нечеткими множествами (термами)
 """
-
 from typing import Optional
 
-from kernel.base import TNeuroFuzzyBase, MAX, MIN, Named
 from kernel.consts import DELTA_AMOUNT, CRISP_AMOUNT
 from kernel.enums import DefuzzifyMethod, FuzzifyMethod
 from kernel.exceptions import EFuzzySet, NFE_INVALID_BASE_SET
 from kernel.member_func import TMemberFunc, RESULT_FUNC, TMemberFuncSingle, TMemberFuncSmooth
 from kernel.member_func.linear import TMemberFuncTriangular, TMemberFuncTrapezoidal
-from kernel.operation import TOperationBase, TMaxMin
+from kernel.mixins import Named, OperationBased, Learnable
+from kernel.operation import OperationBase, MaxMin
 
 
-class TFuzzySet(Named, TNeuroFuzzyBase):
+class TFuzzySet(Named, OperationBased, Learnable):
     """
     Именованное нечеткое множество (терм лингвистической переменной)
     Используется для хранения термов лингвистических переменных
     """
 
-    def __init__(self, name: str, mf: Optional[TMemberFunc],
-                 a_ops: Optional[TOperationBase] = None):
+    def __init__(self, name: str, mf: Optional[TMemberFunc], ops: OperationBase = MaxMin()):
         """
         Конструктор нечеткого множества
 
         Args:
             name: имя нечеткого множества
             mf: функция принадлежности
-            a_ops: набор базовых операций
+            ops: набор базовых операций
         """
-        super().__init__(name=name)
+        Named.__init__(self, name)
+        OperationBased.__init__(self, ops)
+        Learnable.__init__(self, False)
         self._fn = mf
-        self._ops = a_ops if a_ops is not None else TMaxMin()
-        self._name = name
-        self._is_learn = False
-
-    @property
-    def learn(self) -> bool:
-        """Получить признак необходимости обучения"""
-        return self._is_learn
-
-    @learn.setter
-    def learn(self, value: bool):
-        """Установить признак необходимости обучения"""
-        self._is_learn = value
 
     @property
     def func(self) -> Optional[TMemberFunc]:
@@ -54,16 +41,6 @@ class TFuzzySet(Named, TNeuroFuzzyBase):
     def func(self, new_mf: TMemberFunc):
         """Установить функцию принадлежности"""
         self._fn = new_mf
-
-    @property
-    def ops(self) -> TOperationBase:
-        """Получить набор базовых операций"""
-        return self._ops
-
-    @ops.setter
-    def ops(self, value: TOperationBase):
-        """Установить набор базовых операций"""
-        self._ops = value
 
     def __invert__(self) -> 'TFuzzySet':
         """Операция отрицания (~)"""
@@ -255,34 +232,35 @@ class TFuzzySet(Named, TNeuroFuzzyBase):
         Returns:
             новое нечеткое множество
         """
+        # todo выделить метод фаззификации в отдельный класс
         delta = (self._fn.sup - self._fn.inf) * DELTA_AMOUNT / 2.0
         crdel = (self._fn.sup - self._fn.inf) * CRISP_AMOUNT / 2.0
 
         if fuzzify == FuzzifyMethod.fmTriangle:
-            p1 = MAX(self._fn.inf, crisp - delta)
-            p2 = MIN(self._fn.sup, crisp + delta)
+            p1 = max(self._fn.inf, crisp - delta)
+            p2 = min(self._fn.sup, crisp + delta)
             result = TMemberFuncTriangular(p1, crisp, p2, 1.0, self._fn.inf, self._fn.sup)
 
         elif fuzzify == FuzzifyMethod.fmTrapezoid:
-            p1 = MAX(self._fn.inf, crisp - delta - crdel)
-            p2 = MAX(self._fn.inf, crisp - crdel)
-            p3 = MIN(self._fn.sup, crisp + crdel)
-            p4 = MIN(self._fn.sup, crisp + crdel + delta)
+            p1 = max(self._fn.inf, crisp - delta - crdel)
+            p2 = max(self._fn.inf, crisp - crdel)
+            p3 = min(self._fn.sup, crisp + crdel)
+            p4 = min(self._fn.sup, crisp + crdel + delta)
             result = TMemberFuncTrapezoidal(p1, p2, p3, p4, 1.0, self._fn.inf, self._fn.sup)
 
         elif fuzzify == FuzzifyMethod.fmSingleton:
             result = TMemberFuncSingle(crisp, 1.0, self._fn.inf, self._fn.sup)
 
         elif fuzzify == FuzzifyMethod.fmSmoothTri:
-            p1 = MAX(self._fn.inf, crisp - delta)
-            p2 = MIN(self._fn.sup, crisp + delta)
+            p1 = max(self._fn.inf, crisp - delta)
+            p2 = min(self._fn.sup, crisp + delta)
             result = TMemberFuncSmooth(p1, crisp, p2, 1.0, self._fn.inf, self._fn.sup)
 
         elif fuzzify == FuzzifyMethod.fmSmoothTrap:
-            p1 = MAX(self._fn.inf, crisp - delta - crdel)
-            p2 = MAX(self._fn.inf, crisp - crdel)
-            p3 = MIN(self._fn.sup, crisp + crdel)
-            p4 = MIN(self._fn.sup, crisp + crdel + delta)
+            p1 = max(self._fn.inf, crisp - delta - crdel)
+            p2 = max(self._fn.inf, crisp - crdel)
+            p3 = min(self._fn.sup, crisp + crdel)
+            p4 = min(self._fn.sup, crisp + crdel + delta)
             result = TMemberFuncSmooth(p1, p2, p3, p4, 1.0, self._fn.inf, self._fn.sup)
 
         else:

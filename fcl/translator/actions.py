@@ -37,10 +37,10 @@ def create_variable(element: FCLElement, builder: Builder):
     match builder.var_type:
         case VariableType.vtInput:
             v.type = VariableType.vtInput
-            builder.func_block.add_input(v)
+            builder.func_block.inputs.append(v)
         case VariableType.vtOutput:
             v.type = VariableType.vtOutput
-            builder.func_block.add_output(v)
+            builder.func_block.outputs.append(v)
         case VariableType.vtIntermediate:
             v.type = VariableType.vtIntermediate
 
@@ -108,7 +108,8 @@ def set_supremum(element: FCLElement, builder: Builder):
 
 
 def set_in_var_param(element: FCLElement, builder: Builder):
-    idx = builder.func_block.is_input_exists(builder.identifier)
+    # idx = builder.func_block.is_input_exists(builder.identifier)
+    idx = builder.func_block.inputs.name_index(builder.identifier)
     if idx == -1:
         raise Exception()
 
@@ -184,7 +185,7 @@ def set_defuzzify_method(element: FCLElement, builder: Builder):
 
 
 def set_out_var_param(element: FCLElement, builder: Builder):
-    idx = builder.func_block.is_output_exists(builder.identifier)
+    idx = builder.func_block.outputs.name_index(builder.identifier)
     if idx == -1:
         raise Exception()
 
@@ -239,7 +240,7 @@ def create_rule(element: FCLElement, builder: Builder):
 
 
 def add_in_var(element: FCLElement, builder: Builder):
-    idx = builder.func_block.is_input_exists(builder.identifier)
+    idx = builder.func_block.inputs.name_index(builder.identifier)
     if idx == -1:
         raise Exception()
 
@@ -274,9 +275,9 @@ def add_term(element: FCLElement, builder: Builder):
 
     match builder.curr_val_type:
         case VariableType.vtInput:
-            idx = builder.current_rules.is_input_term_exists(builder.curr_val_num, builder.identifier)
+            idx = builder.func_block.inputs[builder.curr_val_num].is_term_exists(builder.identifier)
         case VariableType.vtOutput:
-            idx = builder.current_rules.is_output_term_exists(builder.curr_val_num, builder.identifier)
+            idx = builder.func_block.outputs[builder.curr_val_num].is_term_exists(builder.identifier)
 
     if idx == -1:
         raise Exception("FCLE_UNKNOWN_TERM")
@@ -302,7 +303,7 @@ def add_term_and(element: FCLElement, builder: Builder):
 
 
 def add_out_var(element: FCLElement, builder: Builder):
-    idx = builder.func_block.is_output_exists(builder.identifier)
+    idx = builder.func_block.outputs.name_index(builder.identifier)
     if idx == -1:
         raise Exception("FCLE_UNKNOWN_IDENT")
     builder.consequent = idx

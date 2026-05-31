@@ -1,13 +1,12 @@
 from typing import Optional, List
 
 from .custom import TCustomVariable
-from ..base import GE, LS
-from ..consts import BaseSet, Natural
+from ..consts import Crisp, Natural
 from ..enums import FuzzifyMethod, DefuzzifyMethod, ValueType, OperationCode
 from ..exceptions import ELingVariable, NFE_INVALID_BASE, NFE_INVALID_INDEX, NFE_INVALID_BASE_SET
 from ..fuzzy_set import TFuzzySet
 from ..member_func import RESULT_FUNC
-from ..operation import TOperationBase
+from ..operation import OperationBase
 
 
 class TLingVariable(TCustomVariable):
@@ -15,8 +14,8 @@ class TLingVariable(TCustomVariable):
     Лингвистическая переменная
     """
 
-    def __init__(self, name: str, a_inf: BaseSet, a_sup: BaseSet,
-                 a_ops: TOperationBase,
+    def __init__(self, name: str, a_inf: Crisp, a_sup: Crisp,
+                 a_ops: OperationBase,
                  a_fmethod: Optional[FuzzifyMethod] = None,
                  a_dfmethod: Optional[DefuzzifyMethod] = None):
         """
@@ -35,7 +34,7 @@ class TLingVariable(TCustomVariable):
         else:
             super().__init__(name)
 
-        if GE(a_inf, a_sup):
+        if a_inf >= a_sup:
             raise ELingVariable("", NFE_INVALID_BASE)
 
         self._inf_base = a_inf
@@ -49,44 +48,44 @@ class TLingVariable(TCustomVariable):
         return self._terms
 
     @property
-    def ops(self) -> Optional[TOperationBase]:
+    def ops(self) -> Optional[OperationBase]:
         return self._operation
 
     @ops.setter
-    def ops(self, value: TOperationBase):
+    def ops(self, value: OperationBase):
         for t in self._terms:
             t.ops = value
         self._operation = value
 
     @property
-    def inf(self) -> BaseSet:
+    def inf(self) -> Crisp:
         """Получить нижнюю границу"""
         return self._inf_base
 
     @inf.setter
-    def inf(self, value: BaseSet):
+    def inf(self, value: Crisp):
         """Установить нижнюю границу"""
-        if LS(value, self._sup_base):
-            self._inf_base = value
-            for t in self._terms:
-                t.func.inf = value
-        else:
+        if value >= self._sup_base:
             raise ELingVariable("", NFE_INVALID_BASE)
 
+        self._inf_base = value
+        for t in self._terms:
+            t.func.inf = value
+
     @property
-    def sup(self) -> BaseSet:
+    def sup(self) -> Crisp:
         """Получить верхнюю границу"""
         return self._sup_base
 
     @sup.setter
-    def sup(self, value: BaseSet):
+    def sup(self, value: Crisp):
         """Установить верхнюю границу"""
-        if LS(self._inf_base, value):
-            self._sup_base = value
-            for t in self._terms:
-                t.func.sup = value
-        else:
+        if self._inf_base >= value:
             raise ELingVariable("", NFE_INVALID_BASE)
+
+        self._sup_base = value
+        for t in self._terms:
+            t.func.sup = value
 
     def set_term(self, index: Natural, value: TFuzzySet):
         """
@@ -234,12 +233,6 @@ class TLingVariable(TCustomVariable):
                         op.name,
                         RESULT_FUNC(op.func, op.ops.points)
                     ))
-                    # todo здесь шляпа
-                    # res.append(TFuzzySet(
-                    #     op.name,
-                    #     RESULT_FUNC(op.func.inf, op.func.sup, op.ops.points),
-                    #     op.ops
-                    # ))
 
                 case OperationCode.ocNot:
                     if not res:

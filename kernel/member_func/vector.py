@@ -1,10 +1,9 @@
 from typing import Optional
 
-from kernel.consts import BaseSet, Natural, Membership
+from kernel.comparison import eq
+from kernel.consts import Crisp, Natural, Membership
 from kernel.enums import MemberFuncType
 from kernel.member_func.base import TMemberFunc
-from kernel.base import EQ
-
 
 class TMemberFuncLnVect(TMemberFunc):
     """
@@ -38,7 +37,7 @@ class TMemberFuncLnVect(TMemberFunc):
         """Получить значение вектора"""
         return self._data[index]
 
-    def _get_value(self, value: BaseSet) -> Membership:
+    def _get_value(self, value: Crisp) -> Membership:
         """Получить значение функции принадлежности (линейная интерполяция)"""
         i = self._get_index(value)
 
@@ -48,11 +47,11 @@ class TMemberFuncLnVect(TMemberFunc):
         x2 = self._inf_base + (i + 1) * step
 
         y1 = self._data[i]
-        if EQ(value, x1):
+        if eq(value, x1):
             return y1
 
         y2 = self._data[i + 1]
-        if EQ(value, x2):
+        if eq(value, x2):
             return y2
 
         return y1 + (y2 - y1) / (x2 - x1) * (value - x1)

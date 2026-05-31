@@ -2,19 +2,19 @@ from typing import List
 
 from kernel.block.function import TFunctionBlock
 from kernel.block.rule import TRuleBlock
-from kernel.consts import BaseSet, Natural, StdLingNames
+from kernel.consts import Crisp, Natural, StdLingNames
 from kernel.enums import FuzzifyMethod, DefuzzifyMethod, VariableType, OperationCode
 from kernel.fuzzy_set import TFuzzySet
 from kernel.member_func.linear import TMemberFuncLinear, TMemberFuncBoundary
 from kernel.member_func.smooth import TMemberFuncSmooth
-from kernel.operation import TOperationBase
+from kernel.operation import OperationBase
 from kernel.variables.ling import TLingVariable
 
 
 def create_classify_block(
-    name: str, points_count: Natural, inf: BaseSet, sup: BaseSet, units: str, terms_count: Natural,
+    name: str, points_count: Natural, inf: Crisp, sup: Crisp, units: str, terms_count: Natural,
     classes_count: Natural, class_name: List[str], fuzz: FuzzifyMethod, defuzz: DefuzzifyMethod,
-    op_base: TOperationBase, learn_in_mf: bool, learn_out_mf: bool
+    op_base: OperationBase, learn_in_mf: bool, learn_out_mf: bool
 ) -> TFunctionBlock:
     block = TFunctionBlock(name)
 

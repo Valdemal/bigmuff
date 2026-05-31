@@ -1,19 +1,18 @@
-import sys
 from abc import abstractmethod, ABC
 from typing import List
 
-from kernel.base import TNeuroFuzzyBase, LS, GE, INRANGE, GT, EQ, ZR
-from kernel.consts import BaseSet, Membership, Natural, MemberFuncTypeName
+from kernel.comparison import inrange, gt, eq, ls, ge
+from kernel.consts import Crisp, Membership, Natural
 from kernel.enums import MemberFuncType
 from kernel.exceptions import EMemberFunc, NFE_INVALID_BASE, NFE_INVALID_INDEX, NFE_OUT_OF_DOMAIN
 
 
-class TMemberFunc(TNeuroFuzzyBase, ABC):
+class TMemberFunc(ABC):
     """
     Виртуальный базовый класс функции принадлежности
     """
 
-    def __init__(self, a_inf: BaseSet, a_sup: BaseSet):
+    def __init__(self, a_inf: Crisp, a_sup: Crisp):
         """
         Конструктор функции принадлежности
 
@@ -21,9 +20,7 @@ class TMemberFunc(TNeuroFuzzyBase, ABC):
             a_inf: нижняя граница базового множества
             a_sup: верхняя граница базового множества
         """
-        super().__init__()
-
-        if GE(a_inf, a_sup):
+        if ge(a_inf, a_sup):
             raise EMemberFunc("", NFE_INVALID_BASE)
 
         self._inf_base = a_inf
@@ -33,32 +30,32 @@ class TMemberFunc(TNeuroFuzzyBase, ABC):
         self._data: List[Membership] = []
 
     @property
-    def inf(self) -> BaseSet:
+    def inf(self) -> Crisp:
         """Получить нижнюю границу базового множества"""
         return self._inf_base
 
     @inf.setter
-    def inf(self, value: BaseSet):
+    def inf(self, value: Crisp):
         """Установить нижнюю границу базового множества"""
-        if LS(value, self._sup_base):
-            self._inf_base = value
-            self._adjust_nodes()
-        else:
+        if ge(value, self._sup_base):
             raise EMemberFunc("", NFE_INVALID_BASE)
 
+        self._inf_base = value
+        self._adjust_nodes()
+
     @property
-    def sup(self) -> BaseSet:
+    def sup(self) -> Crisp:
         """Получить верхнюю границу базового множества"""
         return self._sup_base
 
     @sup.setter
-    def sup(self, value: BaseSet):
+    def sup(self, value: Crisp):
         """Установить верхнюю границу базового множества"""
-        if LS(self._inf_base, value):
-            self._sup_base = value
-            self._adjust_nodes()
-        else:
+        if ge(self._inf_base, value):
             raise EMemberFunc("", NFE_INVALID_BASE)
+
+        self._sup_base = value
+        self._adjust_nodes()
 
     @property
     def nodes(self):
@@ -107,7 +104,7 @@ class TMemberFunc(TNeuroFuzzyBase, ABC):
         """
         return False
 
-    def __call__(self, value: BaseSet) -> Membership:
+    def __call__(self, value: Crisp) -> Membership:
         """
         Получение значения функции принадлежности
 
@@ -117,10 +114,10 @@ class TMemberFunc(TNeuroFuzzyBase, ABC):
         Returns:
             степень принадлежности
         """
-        if INRANGE(value, self._inf_base, self._sup_base):
-            return self._get_value(value)
-        else:
+        if not inrange(value, self._inf_base, self._sup_base):
             raise EMemberFunc("", NFE_OUT_OF_DOMAIN)
+
+        return self._get_value(value)
 
     def add_node(self, value: 'TNodeValue'):
         """
@@ -129,23 +126,23 @@ class TMemberFunc(TNeuroFuzzyBase, ABC):
         Args:
             value: добавляемая точка
         """
-        if INRANGE(value.x, self._inf_base, self._sup_base):
-            last = len(self._nodes) - 1
-
-            i = 0
-            while i <= last and GT(value.x, self._nodes[i].x):
-                i += 1
-
-            if i > last:
-                self._nodes.append(value)
-            elif EQ(value.x, self._nodes[i].x):
-                self._nodes[i].dom = value.dom
-            else:
-                self._nodes.insert(i, value)
-
-            self._nodes[i].owner = self
-        else:
+        if not inrange(value.x, self._inf_base, self._sup_base):
             raise EMemberFunc("", NFE_OUT_OF_DOMAIN)
+
+        last = len(self._nodes) - 1
+
+        i = 0
+        while i <= last and gt(value.x, self._nodes[i].x):
+            i += 1
+
+        if i > last:
+            self._nodes.append(value)
+        elif eq(value.x, self._nodes[i].x):
+            self._nodes[i].dom = value.dom
+        else:
+            self._nodes.insert(i, value)
+
+        self._nodes[i].owner = self
 
     def append_node(self, value: 'TNodeValue'):
         """
@@ -154,11 +151,11 @@ class TMemberFunc(TNeuroFuzzyBase, ABC):
         Args:
             value: добавляемая точка
         """
-        if INRANGE(value.x, self._inf_base, self._sup_base):
-            self._nodes.append(value)
-            self._nodes[-1].owner = self
-        else:
+        if not inrange(value.x, self._inf_base, self._sup_base):
             raise EMemberFunc("", NFE_OUT_OF_DOMAIN)
+
+        self._nodes.append(value)
+        self._nodes[-1].owner = self
 
     def delete_node(self, index: Natural):
         """
@@ -172,7 +169,7 @@ class TMemberFunc(TNeuroFuzzyBase, ABC):
         else:
             raise EMemberFunc("", NFE_INVALID_INDEX)
 
-    def _get_index(self, value: BaseSet) -> Natural:
+    def _get_index(self, value: Crisp) -> Natural:
         """
         Получение индекса элемента вектора
 
@@ -182,7 +179,6 @@ class TMemberFunc(TNeuroFuzzyBase, ABC):
         Returns:
             индекс в векторе
         """
-        # todo inspect here
         return int(
             (value - self._inf_base) * (len(self._data) - 1) / (self._sup_base - self._inf_base)
         )
@@ -190,13 +186,13 @@ class TMemberFunc(TNeuroFuzzyBase, ABC):
     def _adjust_nodes(self):
         """Привести узловые точки в соответствие с границами"""
         for i in range(len(self._nodes)):
-            if GT(self._nodes[i].x, self._sup_base):
+            if gt(self._nodes[i].x, self._sup_base):
                 self._nodes[i].x = self._sup_base
-            elif LS(self._nodes[i].x, self._inf_base):
+            elif ls(self._nodes[i].x, self._inf_base):
                 self._nodes[i].x = self._inf_base
 
     @abstractmethod
-    def _get_value(self, value: BaseSet) -> Membership:
+    def _get_value(self, value: Crisp) -> Membership:
         """
         Получение значения функции принадлежности (должен быть переопределен)
 
@@ -208,7 +204,7 @@ class TMemberFunc(TNeuroFuzzyBase, ABC):
         """
         pass
 
-    def cog(self, points: Natural) -> BaseSet:
+    def cog(self, points: Natural) -> Crisp:
         """
         Центр тяжести (Center of Gravity)
 
@@ -229,12 +225,12 @@ class TMemberFunc(TNeuroFuzzyBase, ABC):
             sum_m += val
             x += step
 
-        if ZR(sum_m):
+        if eq(sum_m, 0):
             return (self._sup_base - self._inf_base) / 2.0
         else:
             return sum_xm / sum_m
 
-    def coa(self, points: Natural) -> BaseSet:
+    def coa(self, points: Natural) -> Crisp:
         """
         Центр площади (Center of Area)
 
@@ -257,17 +253,17 @@ class TMemberFunc(TNeuroFuzzyBase, ABC):
         x = self._inf_base
         i = 0
 
-        while i < points and LS(half_sum, total_sum):
+        while i < points and ls(half_sum, total_sum):
             half_sum += self(x)
             x += step
             i += 1
 
-        if ZR(half_sum) or ZR(total_sum):
+        if eq(half_sum, 0) or eq(total_sum, 0):
             return (self._sup_base - self._inf_base) / 2.0
         else:
             return x - step
 
-    def lm(self, points: Natural) -> BaseSet:
+    def lm(self, points: Natural) -> Crisp:
         """
         Левый максимум (Left Most Maximum)
 
@@ -284,14 +280,14 @@ class TMemberFunc(TNeuroFuzzyBase, ABC):
 
         for _ in range(points):
             mi = self(x)
-            if GT(mi, max_val):
+            if gt(mi, max_val):
                 max_val = mi
                 x_max = x
             x += step
 
         return x_max
 
-    def rm(self, points: Natural) -> BaseSet:
+    def rm(self, points: Natural) -> Crisp:
         """
         Правый максимум (Right Most Maximum)
 
@@ -308,14 +304,14 @@ class TMemberFunc(TNeuroFuzzyBase, ABC):
 
         for _ in range(points):
             mi = self(x)
-            if GT(mi, max_val):
+            if gt(mi, max_val):
                 max_val = mi
                 x_max = x
             x -= step
 
         return x_max
 
-    def mom(self, points: Natural) -> BaseSet:
+    def mom(self, points: Natural) -> Crisp:
         """
         Среднее максимумов (Mean of Maximums)
 
@@ -333,11 +329,11 @@ class TMemberFunc(TNeuroFuzzyBase, ABC):
 
         for _ in range(points):
             mi = self(x)
-            if GT(mi, max_val):
+            if gt(mi, max_val):
                 max_val = mi
                 x_start = x
                 x_end = x
-            if EQ(mi, max_val):
+            if eq(mi, max_val):
                 x_end = x
             x += step
 

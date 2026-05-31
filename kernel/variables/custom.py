@@ -1,21 +1,20 @@
-import sys
 from abc import ABC, abstractmethod
 from typing import Optional, List
 
+from kernel.mixins import Named
 from kernel.enums import FuzzifyMethod, DefuzzifyMethod, ValueType, VariableType
 from kernel.exceptions import EFuzzyVariable, NFE_INVALID_FUZZIFY_METHOD, NFE_INVALID_DEFUZZIFY_METHOD
 from kernel.fuzzy_set import TFuzzySet
-from kernel.base import TNeuroFuzzyBase, Named
-from kernel.operation import TOperationBase
+from kernel.operation import OperationBase
 
 
-class TCustomVariable(Named, TNeuroFuzzyBase, ABC):
+class TCustomVariable(Named, ABC):
     """
     Базовый класс для нечеткой переменной
     """
 
-    def __init__(self, name: str, a_fmethod: Optional[FuzzifyMethod] = None,
-                 a_dfmethod: Optional[DefuzzifyMethod] = None):
+    def __init__(self, name: str, a_fmethod: Optional[FuzzifyMethod] = FuzzifyMethod.fmNA,
+                 a_dfmethod: Optional[DefuzzifyMethod] = DefuzzifyMethod.dmNA):
         """
         Конструктор базового класса переменной
 
@@ -28,27 +27,19 @@ class TCustomVariable(Named, TNeuroFuzzyBase, ABC):
         self._value_type = ValueType.valNA
         self._type = VariableType.vtNA
         self._units = ""
-
-        if a_fmethod is not None:
-            self._fuzzify = a_fmethod
-        else:
-            self._fuzzify = FuzzifyMethod.fmNA
-
-        if a_dfmethod is not None:
-            self._defuzzify = a_dfmethod
-        else:
-            self._defuzzify = DefuzzifyMethod.dmNA
+        self._fuzzify = a_fmethod
+        self._defuzzify = a_dfmethod
 
     @abstractmethod
     def value(self, revform: List[int]) -> TFuzzySet:
         pass
 
     @property
-    def ops(self) -> Optional[TOperationBase]:
-        pass
+    def ops(self) -> Optional[OperationBase]:
+        return None
 
     @ops.setter
-    def ops(self, value: TOperationBase):
+    def ops(self, value: OperationBase):
         pass
 
     @abstractmethod

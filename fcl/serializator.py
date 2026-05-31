@@ -1,18 +1,18 @@
 from typing import List
 
 from fcl.consts import VARIABLE_VAL_TYPE_NAME, FUZZIFY_METHOD_NAME, MEMBER_FUNC_TYPE_NAME, DEFUZZIFY_METHOD_NAME
-from kernel.block.function import TFunctionBlock
-from kernel.block.rule import TRuleBlock
+
+from kernel.blocks import RuleBlock, FunctionalBlock
 from kernel.enums import OperationCode
 from kernel.fuzzy_set import TFuzzySet
 from kernel.member_func import TMemberFunc
-from kernel.rules.composite import TCompositeRule
+from kernel.rules import CompositeRule
 from kernel.variables.custom import TCustomVariable
 from kernel.variables.fuzzy import TFuzzyVariable
 from kernel.variables.ling import TLingVariable
 
 
-def to_fcl(func_block: TFunctionBlock) -> str:
+def to_fcl(func_block: FunctionalBlock) -> str:
     return f"""FUNCTION_BLOCK {func_block.name}
 
 VAR_INPUT
@@ -89,7 +89,7 @@ def fuzzy_set_to_fcl(fuzzy_set: TFuzzySet) -> str:
     return res + ';\n'
 
 
-def rule_to_fcl(rule: TCompositeRule) -> str:
+def rule_to_fcl(rule: CompositeRule) -> str:
     # Формирование выражения антецедента
     res_stack: List[str] = []
 
@@ -105,7 +105,7 @@ def rule_to_fcl(rule: TCompositeRule) -> str:
             if val >= len(rule.rules):
                 raise Exception("неверный индекс входной переменной правила")
 
-            res_stack.append(f'({rule.rules[val].ant.name})')
+            res_stack.append(f'({rule.rules[val].antecedent.fuzzy.name})')
 
         elif opcode == OperationCode.ocNot:
             if not res_stack:
@@ -133,7 +133,7 @@ def rule_to_fcl(rule: TCompositeRule) -> str:
     if len(res_stack) != 1:
         raise Exception("неполное выражение")
 
-    result = f"RULE {rule.name} : IF {res_stack[0]} THEN {rule.rules[0].cons.name} WITN {rule.certainty}"
+    result = f"RULE {rule.name} : IF {res_stack[0]} THEN {rule.rules[0].consequent.fuzzy.name} WITN {rule.certainty}"
 
     if rule.learn:
         result += f" LEARN"
@@ -143,7 +143,7 @@ def rule_to_fcl(rule: TCompositeRule) -> str:
     return result
 
 
-def rule_block_to_fcl(block: TRuleBlock) -> str:
+def rule_block_to_fcl(block: RuleBlock) -> str:
     return f"""RULEBLOCK {block.name}
     OPERATION_BASE : {block.ops.name}, {block.ops.points};
     {'\n\t'.join(rule_to_fcl(rule) for rule in block.rules)}

@@ -2,15 +2,13 @@
 Модуль для работы с нечеткими переменными
 """
 
-import sys
 from typing import Optional, List
 
 from .custom import TCustomVariable
 from ..enums import FuzzifyMethod, DefuzzifyMethod, ValueType, OperationCode, VariableType
-from ..exceptions import EFuzzyVariable, NFE_INVALID_EXPRESSION
 from ..fuzzy_set import TFuzzySet
 from ..member_func import RESULT_FUNC
-from ..operation import TOperationBase
+from ..operation import OperationBase
 
 
 class TFuzzyVariable(TCustomVariable):
@@ -54,14 +52,14 @@ class TFuzzyVariable(TCustomVariable):
             self._defuzzify = a_dfmethod
 
     @property
-    def ops(self) -> Optional[TOperationBase]:
+    def ops(self) -> Optional[OperationBase]:
         """Получить набор операций"""
         if self._fs:
             return self._fs.ops
         return None
 
     @ops.setter
-    def ops(self, value: TOperationBase):
+    def ops(self, value: OperationBase):
         """Установить набор операций"""
         if self._fs:
             self._fs.ops = value
