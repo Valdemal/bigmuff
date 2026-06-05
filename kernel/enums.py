@@ -8,6 +8,7 @@ class MemberFuncType(Enum):
     mfLinear = 2
     mfSmooth = 3
     mfLnVector = 4
+    mfGauss = 5
 
 
 class VariableType(Enum):

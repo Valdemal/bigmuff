@@ -108,7 +108,6 @@ def set_supremum(element: FCLElement, builder: Builder):
 
 
 def set_in_var_param(element: FCLElement, builder: Builder):
-    # idx = builder.func_block.is_input_exists(builder.identifier)
     idx = builder.func_block.inputs.name_index(builder.identifier)
     if idx == -1:
         raise Exception()
@@ -150,6 +149,8 @@ def set_func_type(element: FCLElement, builder: Builder):
             builder.func_type = MemberFuncType.mfSmooth
         case FCLTokens.vect:
             builder.func_type = MemberFuncType.mfLnVector
+        case FCLTokens.gauss:
+            builder.func_type = MemberFuncType.mfGauss
 
 
 def create_func(element: FCLElement, builder: Builder):

@@ -6,7 +6,7 @@ from typing import Optional
 from kernel.consts import DELTA_AMOUNT, CRISP_AMOUNT
 from kernel.enums import DefuzzifyMethod, FuzzifyMethod
 from kernel.exceptions import EFuzzySet, NFE_INVALID_BASE_SET
-from kernel.member_func import TMemberFunc, RESULT_FUNC, TMemberFuncSingle, TMemberFuncSmooth
+from kernel.member_func import TMemberFunc, RESULT_FUNC, TMemberFuncSingle
 from kernel.member_func.linear import TMemberFuncTriangular, TMemberFuncTrapezoidal
 from kernel.mixins import Named, OperationBased, Learnable
 from kernel.operation import OperationBase, MaxMin
@@ -251,17 +251,17 @@ class TFuzzySet(Named, OperationBased, Learnable):
         elif fuzzify == FuzzifyMethod.fmSingleton:
             result = TMemberFuncSingle(crisp, 1.0, self._fn.inf, self._fn.sup)
 
-        elif fuzzify == FuzzifyMethod.fmSmoothTri:
-            p1 = max(self._fn.inf, crisp - delta)
-            p2 = min(self._fn.sup, crisp + delta)
-            result = TMemberFuncSmooth(p1, crisp, p2, 1.0, self._fn.inf, self._fn.sup)
-
-        elif fuzzify == FuzzifyMethod.fmSmoothTrap:
-            p1 = max(self._fn.inf, crisp - delta - crdel)
-            p2 = max(self._fn.inf, crisp - crdel)
-            p3 = min(self._fn.sup, crisp + crdel)
-            p4 = min(self._fn.sup, crisp + crdel + delta)
-            result = TMemberFuncSmooth(p1, p2, p3, p4, 1.0, self._fn.inf, self._fn.sup)
+        # elif fuzzify == FuzzifyMethod.fmSmoothTri:
+        #     p1 = max(self._fn.inf, crisp - delta)
+        #     p2 = min(self._fn.sup, crisp + delta)
+        #     result = TMemberFuncSmoothBase(p1, crisp, p2, 1.0, self._fn.inf, self._fn.sup)
+        #
+        # elif fuzzify == FuzzifyMethod.fmSmoothTrap:
+        #     p1 = max(self._fn.inf, crisp - delta - crdel)
+        #     p2 = max(self._fn.inf, crisp - crdel)
+        #     p3 = min(self._fn.sup, crisp + crdel)
+        #     p4 = min(self._fn.sup, crisp + crdel + delta)
+        #     result = TMemberFuncSmoothBase(p1, p2, p3, p4, 1.0, self._fn.inf, self._fn.sup)
 
         else:
             raise ValueError(f"Unknown fuzzify method: {fuzzify}")

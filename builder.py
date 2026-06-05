@@ -5,7 +5,8 @@ from kernel.consts import Crisp
 from kernel.containers.evaluatedvar import EvaluatedVar
 from kernel.enums import VariableType, ValueType, FuzzifyMethod, DefuzzifyMethod, MemberFuncType
 from kernel.fuzzy_set import TFuzzySet
-from kernel.member_func import TMemberFunc, TMemberFuncSingle, TMemberFuncLinear, TMemberFuncSmooth, TMemberFuncLnVect
+from kernel.member_func import TMemberFunc, TMemberFuncSingle, TMemberFuncLinear, \
+    TMemberFuncLnVect, GaussianMemberFunc
 from kernel.node_value import TNodeValue
 from kernel.operation import obMaxMin, OperationBase
 from kernel.rules import CompositeRule
@@ -97,7 +98,8 @@ class Builder:
             case MemberFuncType.mfLinear:
                 self._current_func = TMemberFuncLinear(self.infinum, self.supremum)
             case MemberFuncType.mfSmooth:
-                self._current_func = TMemberFuncSmooth(self.infinum, self.supremum)
+                pass
+                # self._current_func = TMemberFuncSmoothBase(self.infinum, self.supremum)
             case MemberFuncType.mfLnVector:
                 self._current_func = TMemberFuncLnVect(self.infinum, self.supremum, self._points)
                 self._points = 0
@@ -121,6 +123,8 @@ class Builder:
             case MemberFuncType.mfLnVector:
                 idx = self._x * (len(self._current_func.data) - 1) // (self._current_func.sup - self._current_func.inf)
                 self._current_func[idx] = self._y
+            case MemberFuncType.mfGauss:
+                self._current_func = GaussianMemberFunc(self._x, self._y)
 
     def set_var_type(self, var_type: VariableType):
         self.var_type = var_type

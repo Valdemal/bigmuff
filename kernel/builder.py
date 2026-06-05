@@ -6,7 +6,7 @@ from kernel.consts import Crisp, Natural, StdLingNames
 from kernel.enums import FuzzifyMethod, DefuzzifyMethod, VariableType, OperationCode
 from kernel.fuzzy_set import TFuzzySet
 from kernel.member_func.linear import TMemberFuncLinear, TMemberFuncBoundary
-from kernel.member_func.smooth import TMemberFuncSmooth
+from kernel.member_func.smooth import TMemberFuncSmoothBase
 from kernel.operation import OperationBase
 from kernel.variables.ling import TLingVariable
 
@@ -35,7 +35,7 @@ def create_classify_block(
         name = StdLingNames[3][n_id]
 
         # первый краевой терм
-        func = TMemberFuncSmooth(True, x1, x2, inf, sup)
+        func = TMemberFuncSmoothBase(True, x1, x2, inf, sup)
         set = TFuzzySet(name, func, op_base)
         set.learn = learn_in_mf
         var.add_term(set)
@@ -43,7 +43,7 @@ def create_classify_block(
         for _ in range(1, terms_count - 1):
             n_id += 1
             name = StdLingNames[3][n_id]
-            func = TMemberFuncSmooth(x1, x2, x3, 1, inf, sup)
+            func = TMemberFuncSmoothBase(x1, x2, x3, 1, inf, sup)
             set = TFuzzySet(name, func, op_base)
             set.learn = learn_in_mf
             var.add_term(set)
@@ -55,7 +55,7 @@ def create_classify_block(
 
         n_id += 1
         name = StdLingNames[3][n_id]
-        func = TMemberFuncSmooth(False, x1, x2, inf, sup)
+        func = TMemberFuncSmoothBase(False, x1, x2, inf, sup)
         set = TFuzzySet(name, func, op_base)
         set.learn = learn_in_mf
         var.add_term(set)
