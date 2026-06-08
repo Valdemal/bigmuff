@@ -1,13 +1,12 @@
 from builder import Builder
 from fcl.enums import FCLTokens
 from fcl.structs import FCLElement
-from kernel.enums import VariableType, ValueType, FuzzifyMethod, MemberFuncType, DefuzzifyMethod, OperationCode
+from kernel.enums import VariableType, ValueType, MemberFuncType, DefuzzifyMethod, OperationCode
 from kernel.fuzzification import TriangularFuzzification, TrapezoidFuzzification, SingletonFuzzification, \
     GaussFuzzification
 from kernel.fuzzy_set import TFuzzySet
 from kernel.member_func import TMemberFuncLinear
 from kernel.operation import obMaxMin, obSumProd, obLukasiewicz, obKDLogic, obZ2Logic, obZ3Logic
-from kernel.variables.custom import CustomVariable
 from kernel.variables.fuzzy import FuzzyVariable
 from kernel.variables.ling import LingVariable
 

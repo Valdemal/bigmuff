@@ -1,14 +1,14 @@
 from abc import abstractmethod, ABC
 
 from kernel.consts import Crisp, DELTA_AMOUNT, CRISP_AMOUNT
-from kernel.member_func import TMemberFunc, TMemberFuncSingle
+from kernel.member_func import TMemberFunc, TMemberFuncSingle, GaussianMemberFunc
 from kernel.member_func.linear import TMemberFuncTriangular, TMemberFuncTrapezoidal
 from kernel.mixins import RangeDefined
 
 
 class FuzzificationMethod(ABC):
     @abstractmethod
-    def __call__(self, crisp: Crisp, base:  RangeDefined) -> TMemberFunc:
+    def __call__(self, crisp: Crisp, base: RangeDefined) -> TMemberFunc:
         pass
 
 
@@ -22,6 +22,7 @@ class NeighborhoodFuzzification(FuzzificationMethod, ABC):
 
     def _get_crdel(self, base: RangeDefined):
         return (base.sup - base.inf) * self._crisp_amount / 2
+
 
 class TriangularFuzzification(NeighborhoodFuzzification):
     def __call__(self, crisp: Crisp, base: RangeDefined) -> TMemberFunc:
@@ -45,5 +46,8 @@ class SingletonFuzzification(NeighborhoodFuzzification):
     def __call__(self, crisp: Crisp, base: RangeDefined) -> TMemberFunc:
         return TMemberFuncSingle(crisp, 1.0, base.inf, base.sup)
 
+
 class GaussFuzzification(NeighborhoodFuzzification):
-    pass
+    def __call__(self, crisp: Crisp, base: RangeDefined) -> TMemberFunc:
+        mean = self._get_delta(base)
+        return GaussianMemberFunc(base.inf, base.sup, crisp, mean)

@@ -98,9 +98,8 @@ class Builder:
                 self._current_func = TMemberFuncSingle(self.infinum, self.supremum)
             case MemberFuncType.mfLinear:
                 self._current_func = TMemberFuncLinear(self.infinum, self.supremum)
-            case MemberFuncType.mfSmooth:
-                pass
-                # self._current_func = TMemberFuncSmoothBase(self.infinum, self.supremum)
+            case MemberFuncType.mfGauss:
+                self._current_func = GaussianMemberFunc(self.infinum, self.supremum, 1, 1)
             case MemberFuncType.mfLnVector:
                 self._current_func = TMemberFuncLnVect(self.infinum, self.supremum, self._points)
                 self._points = 0
@@ -118,14 +117,14 @@ class Builder:
         self._y = self.numeric_literal
 
     def create_point(self):
-        match self._current_func.type:
+        match self.func_type:
             case MemberFuncType.mfSingleton | MemberFuncType.mfSmooth | MemberFuncType.mfLinear | MemberFuncType.mfNA:
                 self._current_func.add_node(TNodeValue(self._x, self._y))
             case MemberFuncType.mfLnVector:
                 idx = self._x * (len(self._current_func.data) - 1) // (self._current_func.sup - self._current_func.inf)
                 self._current_func[idx] = self._y
             case MemberFuncType.mfGauss:
-                self._current_func = GaussianMemberFunc(self._x, self._y)
+                self._current_func = GaussianMemberFunc(self._current_func.inf, self._current_func.sup, self._x, self._y)
 
     def set_var_type(self, var_type: VariableType):
         self.var_type = var_type

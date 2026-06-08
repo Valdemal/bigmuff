@@ -22,7 +22,7 @@ class TMemberFuncLinearBase(TMemberFunc):
     def lm(self, points: Natural) -> Crisp:
         """Левый максимум"""
         max_val = 0.0
-        x_max = self._inf_base
+        x_max = self.inf
 
         for n in self._nodes:
             if gt(n.dom, max_val):
@@ -34,7 +34,7 @@ class TMemberFuncLinearBase(TMemberFunc):
     def rm(self, points: Natural) -> Crisp:
         """Правый максимум"""
         max_val = 0.0
-        x_max = self._sup_base
+        x_max = self.sup
 
         for n in reversed(self._nodes):
             if gt(n.dom, max_val):
@@ -46,8 +46,8 @@ class TMemberFuncLinearBase(TMemberFunc):
     def mom(self, points: Natural) -> Crisp:
         """Среднее максимумов"""
         max_val = 0.0
-        x_start = self._inf_base
-        x_end = self._inf_base
+        x_start = self.inf
+        x_end = self.inf
 
         for n in self._nodes:
             if gt(n.dom, max_val):

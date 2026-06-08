@@ -1,0 +1,354 @@
+FUNCTION_BLOCK Распознавание_процессов_в_печи
+
+VAR_INPUT
+    i_0 : LING ; 
+    i_1 : LING ; 
+    i_2 : LING ; 
+    i_3 : LING ; 
+    i_4 : LING ; 
+    i_5 : LING ; 
+    i_6 : LING ; 
+    i_7 : LING ; 
+    i_8 : LING ; 
+    i_9 : LING ; 
+    i_10 : LING ; 
+    no_0 : LING ; 
+    no_1 : LING ; 
+    no_2 : LING ; 
+    no_3 : LING ; 
+    no_4 : LING ; 
+    no_5 : LING ; 
+    no_6 : LING ; 
+    no_7 : LING ; 
+    no_8 : LING ; 
+    no_9 : LING ; 
+    no_10 : LING ; 
+END_VAR
+
+VAR_OUTPUT
+    Обр_колец_в_зоне_спек : LING ; 
+    Обр_колец_перед_з_спек : LING ; 
+    Охл_зоны_спекания : LING ; 
+    Нагрев_зоны_спекания : LING ; 
+END_VAR
+
+FUZZIFY i_0
+    METHOD: GAUSS ;
+    UNITS: "усл. амп." ;
+    RANGE := (0.3 .. 1.7) ;
+    TERM HN := GAUSS (0.3, 0.3) LEARN ;
+    TERM N := GAUSS (0.85, 0.1) LEARN ;
+    TERM LN := GAUSS (0.95, 0.05) LEARN ;
+    TERM Z := GAUSS (1, 0.025) LEARN ;
+    TERM LP := GAUSS (1.05, 0.05) LEARN ;
+    TERM P := GAUSS (1.15, 0.1) LEARN ;
+    TERM HP := GAUSS (1.7, 0.3) LEARN ;
+END_FUZZIFY
+FUZZIFY i_1
+    METHOD: GAUSS ;
+    UNITS: "усл. амп." ;
+    RANGE := (0.3 .. 1.7) ;
+    TERM HN := GAUSS (0.3, 0.3) LEARN ;
+    TERM N := GAUSS (0.85, 0.1) LEARN ;
+    TERM LN := GAUSS (0.95, 0.05) LEARN ;
+    TERM Z := GAUSS (1, 0.025) LEARN ;
+    TERM LP := GAUSS (1.05, 0.05) LEARN ;
+    TERM P := GAUSS (1.15, 0.1) LEARN ;
+    TERM HP := GAUSS (1.7, 0.3) LEARN ;
+END_FUZZIFY
+FUZZIFY i_2
+    METHOD: GAUSS ;
+    UNITS: "усл. амп." ;
+    RANGE := (0.3 .. 1.7) ;
+    TERM HN := GAUSS (0.3, 0.3) LEARN ;
+    TERM N := GAUSS (0.85, 0.1) LEARN ;
+    TERM LN := GAUSS (0.95, 0.05) LEARN ;
+    TERM Z := GAUSS (1, 0.025) LEARN ;
+    TERM LP := GAUSS (1.05, 0.05) LEARN ;
+    TERM P := GAUSS (1.15, 0.1) LEARN ;
+    TERM HP := GAUSS (1.7, 0.3) LEARN ;
+END_FUZZIFY
+FUZZIFY i_3
+    METHOD: GAUSS ;
+    UNITS: "усл. амп." ;
+    RANGE := (0.3 .. 1.7) ;
+    TERM HN := GAUSS (0.3, 0.3) LEARN ;
+    TERM N := GAUSS (0.85, 0.1) LEARN ;
+    TERM LN := GAUSS (0.95, 0.05) LEARN ;
+    TERM Z := GAUSS (1, 0.025) LEARN ;
+    TERM LP := GAUSS (1.05, 0.05) LEARN ;
+    TERM P := GAUSS (1.15, 0.1) LEARN ;
+    TERM HP := GAUSS (1.7, 0.3) LEARN ;
+END_FUZZIFY
+FUZZIFY i_4
+    METHOD: GAUSS ;
+    UNITS: "усл. амп." ;
+    RANGE := (0.3 .. 1.7) ;
+    TERM HN := GAUSS (0.3, 0.3) LEARN ;
+    TERM N := GAUSS (0.85, 0.1) LEARN ;
+    TERM LN := GAUSS (0.95, 0.05) LEARN ;
+    TERM Z := GAUSS (1, 0.025) LEARN ;
+    TERM LP := GAUSS (1.05, 0.05) LEARN ;
+    TERM P := GAUSS (1.15, 0.1) LEARN ;
+    TERM HP := GAUSS (1.7, 0.3) LEARN ;
+END_FUZZIFY
+FUZZIFY i_5
+    METHOD: GAUSS ;
+    UNITS: "усл. амп." ;
+    RANGE := (0.3 .. 1.7) ;
+    TERM HN := GAUSS (0.3, 0.3) LEARN ;
+    TERM N := GAUSS (0.85, 0.1) LEARN ;
+    TERM LN := GAUSS (0.95, 0.05) LEARN ;
+    TERM Z := GAUSS (1, 0.025) LEARN ;
+    TERM LP := GAUSS (1.05, 0.05) LEARN ;
+    TERM P := GAUSS (1.15, 0.1) LEARN ;
+    TERM HP := GAUSS (1.7, 0.3) LEARN ;
+END_FUZZIFY
+FUZZIFY i_6
+    METHOD: GAUSS ;
+    UNITS: "усл. амп." ;
+    RANGE := (0.3 .. 1.7) ;
+    TERM HN := GAUSS (0.3, 0.3) LEARN ;
+    TERM N := GAUSS (0.85, 0.1) LEARN ;
+    TERM LN := GAUSS (0.95, 0.05) LEARN ;
+    TERM Z := GAUSS (1, 0.025) LEARN ;
+    TERM LP := GAUSS (1.05, 0.05) LEARN ;
+    TERM P := GAUSS (1.15, 0.1) LEARN ;
+    TERM HP := GAUSS (1.7, 0.3) LEARN ;
+END_FUZZIFY
+FUZZIFY i_7
+    METHOD: GAUSS ;
+    UNITS: "усл. амп." ;
+    RANGE := (0.3 .. 1.7) ;
+    TERM HN := GAUSS (0.3, 0.3) LEARN ;
+    TERM N := GAUSS (0.85, 0.1) LEARN ;
+    TERM LN := GAUSS (0.95, 0.05) LEARN ;
+    TERM Z := GAUSS (1, 0.025) LEARN ;
+    TERM LP := GAUSS (1.05, 0.05) LEARN ;
+    TERM P := GAUSS (1.15, 0.1) LEARN ;
+    TERM HP := GAUSS (1.7, 0.3) LEARN ;
+END_FUZZIFY
+FUZZIFY i_8
+    METHOD: GAUSS ;
+    UNITS: "усл. амп." ;
+    RANGE := (0.3 .. 1.7) ;
+    TERM HN := GAUSS (0.3, 0.3) LEARN ;
+    TERM N := GAUSS (0.85, 0.1) LEARN ;
+    TERM LN := GAUSS (0.95, 0.05) LEARN ;
+    TERM Z := GAUSS (1, 0.025) LEARN ;
+    TERM LP := GAUSS (1.05, 0.05) LEARN ;
+    TERM P := GAUSS (1.15, 0.1) LEARN ;
+    TERM HP := GAUSS (1.7, 0.3) LEARN ;
+END_FUZZIFY
+FUZZIFY i_9
+    METHOD: GAUSS ;
+    UNITS: "усл. амп." ;
+    RANGE := (0.3 .. 1.7) ;
+    TERM HN := GAUSS (0.3, 0.3) LEARN ;
+    TERM N := GAUSS (0.85, 0.1) LEARN ;
+    TERM LN := GAUSS (0.95, 0.05) LEARN ;
+    TERM Z := GAUSS (1, 0.025) LEARN ;
+    TERM LP := GAUSS (1.05, 0.05) LEARN ;
+    TERM P := GAUSS (1.15, 0.1) LEARN ;
+    TERM HP := GAUSS (1.7, 0.3) LEARN ;
+END_FUZZIFY
+FUZZIFY i_10
+    METHOD: GAUSS ;
+    UNITS: "усл. амп." ;
+    RANGE := (0.3 .. 1.7) ;
+    TERM HN := GAUSS (0.3, 0.3) LEARN ;
+    TERM N := GAUSS (0.85, 0.1) LEARN ;
+    TERM LN := GAUSS (0.95, 0.05) LEARN ;
+    TERM Z := GAUSS (1, 0.025) LEARN ;
+    TERM LP := GAUSS (1.05, 0.05) LEARN ;
+    TERM P := GAUSS (1.15, 0.1) LEARN ;
+    TERM HP := GAUSS (1.7, 0.3) LEARN ;
+END_FUZZIFY
+FUZZIFY no_0
+    METHOD: GAUSS ;
+    UNITS: "усл. Па" ;
+    RANGE := (0.3 .. 1.7) ;
+    TERM HN := GAUSS (0.3, 0.3) LEARN ;
+    TERM N := GAUSS (0.85, 0.1) LEARN ;
+    TERM LN := GAUSS (0.95, 0.05) LEARN ;
+    TERM Z := GAUSS (1, 0.025) LEARN ;
+    TERM LP := GAUSS (1.05, 0.05) LEARN ;
+    TERM P := GAUSS (1.15, 0.1) LEARN ;
+    TERM HP := GAUSS (1.7, 0.3) LEARN ;
+END_FUZZIFY
+FUZZIFY no_1
+    METHOD: GAUSS ;
+    UNITS: "усл. Па" ;
+    RANGE := (0.3 .. 1.7) ;
+    TERM HN := GAUSS (0.3, 0.3) LEARN ;
+    TERM N := GAUSS (0.85, 0.1) LEARN ;
+    TERM LN := GAUSS (0.95, 0.05) LEARN ;
+    TERM Z := GAUSS (1, 0.025) LEARN ;
+    TERM LP := GAUSS (1.05, 0.05) LEARN ;
+    TERM P := GAUSS (1.15, 0.1) LEARN ;
+    TERM HP := GAUSS (1.7, 0.3) LEARN ;
+END_FUZZIFY
+FUZZIFY no_2
+    METHOD: GAUSS ;
+    UNITS: "усл. Па" ;
+    RANGE := (0.3 .. 1.7) ;
+    TERM HN := GAUSS (0.3, 0.3) LEARN ;
+    TERM N := GAUSS (0.85, 0.1) LEARN ;
+    TERM LN := GAUSS (0.95, 0.05) LEARN ;
+    TERM Z := GAUSS (1, 0.025) LEARN ;
+    TERM LP := GAUSS (1.05, 0.05) LEARN ;
+    TERM P := GAUSS (1.15, 0.1) LEARN ;
+    TERM HP := GAUSS (1.7, 0.3) LEARN ;
+END_FUZZIFY
+FUZZIFY no_3
+    METHOD: GAUSS ;
+    UNITS: "усл. Па" ;
+    RANGE := (0.3 .. 1.7) ;
+    TERM HN := GAUSS (0.3, 0.3) LEARN ;
+    TERM N := GAUSS (0.85, 0.1) LEARN ;
+    TERM LN := GAUSS (0.95, 0.05) LEARN ;
+    TERM Z := GAUSS (1, 0.025) LEARN ;
+    TERM LP := GAUSS (1.05, 0.05) LEARN ;
+    TERM P := GAUSS (1.15, 0.1) LEARN ;
+    TERM HP := GAUSS (1.7, 0.3) LEARN ;
+END_FUZZIFY
+FUZZIFY no_4
+    METHOD: GAUSS ;
+    UNITS: "усл. Па" ;
+    RANGE := (0.3 .. 1.7) ;
+    TERM HN := GAUSS (0.3, 0.3) LEARN ;
+    TERM N := GAUSS (0.85, 0.1) LEARN ;
+    TERM LN := GAUSS (0.95, 0.05) LEARN ;
+    TERM Z := GAUSS (1, 0.025) LEARN ;
+    TERM LP := GAUSS (1.05, 0.05) LEARN ;
+    TERM P := GAUSS (1.15, 0.1) LEARN ;
+    TERM HP := GAUSS (1.7, 0.3) LEARN ;
+END_FUZZIFY
+FUZZIFY no_5
+    METHOD: GAUSS ;
+    UNITS: "усл. Па" ;
+    RANGE := (0.3 .. 1.7) ;
+    TERM HN := GAUSS (0.3, 0.3) LEARN ;
+    TERM N := GAUSS (0.85, 0.1) LEARN ;
+    TERM LN := GAUSS (0.95, 0.05) LEARN ;
+    TERM Z := GAUSS (1, 0.025) LEARN ;
+    TERM LP := GAUSS (1.05, 0.05) LEARN ;
+    TERM P := GAUSS (1.15, 0.1) LEARN ;
+    TERM HP := GAUSS (1.7, 0.3) LEARN ;
+END_FUZZIFY
+FUZZIFY no_6
+    METHOD: GAUSS ;
+    UNITS: "усл. Па" ;
+    RANGE := (0.3 .. 1.7) ;
+    TERM HN := GAUSS (0.3, 0.3) LEARN ;
+    TERM N := GAUSS (0.85, 0.1) LEARN ;
+    TERM LN := GAUSS (0.95, 0.05) LEARN ;
+    TERM Z := GAUSS (1, 0.025) LEARN ;
+    TERM LP := GAUSS (1.05, 0.05) LEARN ;
+    TERM P := GAUSS (1.15, 0.1) LEARN ;
+    TERM HP := GAUSS (1.7, 0.3) LEARN ;
+END_FUZZIFY
+FUZZIFY no_7
+    METHOD: GAUSS ;
+    UNITS: "усл. Па" ;
+    RANGE := (0.3 .. 1.7) ;
+    TERM HN := GAUSS (0.3, 0.3) LEARN ;
+    TERM N := GAUSS (0.85, 0.1) LEARN ;
+    TERM LN := GAUSS (0.95, 0.05) LEARN ;
+    TERM Z := GAUSS (1, 0.025) LEARN ;
+    TERM LP := GAUSS (1.05, 0.05) LEARN ;
+    TERM P := GAUSS (1.15, 0.1) LEARN ;
+    TERM HP := GAUSS (1.7, 0.3) LEARN ;
+END_FUZZIFY
+FUZZIFY no_8
+    METHOD: GAUSS ;
+    UNITS: "усл. Па" ;
+    RANGE := (0.3 .. 1.7) ;
+    TERM HN := GAUSS (0.3, 0.3) LEARN ;
+    TERM N := GAUSS (0.85, 0.1) LEARN ;
+    TERM LN := GAUSS (0.95, 0.05) LEARN ;
+    TERM Z := GAUSS (1, 0.025) LEARN ;
+    TERM LP := GAUSS (1.05, 0.05) LEARN ;
+    TERM P := GAUSS (1.15, 0.1) LEARN ;
+    TERM HP := GAUSS (1.7, 0.3) LEARN ;
+END_FUZZIFY
+FUZZIFY no_9
+    METHOD: GAUSS ;
+    UNITS: "усл. Па" ;
+    RANGE := (0.3 .. 1.7) ;
+    TERM HN := GAUSS (0.3, 0.3) LEARN ;
+    TERM N := GAUSS (0.85, 0.1) LEARN ;
+    TERM LN := GAUSS (0.95, 0.05) LEARN ;
+    TERM Z := GAUSS (1, 0.025) LEARN ;
+    TERM LP := GAUSS (1.05, 0.05) LEARN ;
+    TERM P := GAUSS (1.15, 0.1) LEARN ;
+    TERM HP := GAUSS (1.7, 0.3) LEARN ;
+END_FUZZIFY
+FUZZIFY no_10
+    METHOD: GAUSS ;
+    UNITS: "усл. Па" ;
+    RANGE := (0.3 .. 1.7) ;
+    TERM HN := GAUSS (0.3, 0.3) LEARN ;
+    TERM N := GAUSS (0.85, 0.1) LEARN ;
+    TERM LN := GAUSS (0.95, 0.05) LEARN ;
+    TERM Z := GAUSS (1, 0.025) LEARN ;
+    TERM LP := GAUSS (1.05, 0.05) LEARN ;
+    TERM P := GAUSS (1.15, 0.1) LEARN ;
+    TERM HP := GAUSS (1.7, 0.3) LEARN ;
+END_FUZZIFY
+
+DEFUZZIFY Обр_колец_в_зоне_спек
+    METHOD: LM ;
+    UNITS: "ст. прин." ;
+    RANGE := (0 .. 1) ;
+    TERM соотвествует := LINEAR (0, 0) (1, 1) ;
+END_DEFUZZIFY
+DEFUZZIFY Обр_колец_перед_з_спек
+    METHOD: LM ;
+    UNITS: "ст. прин." ;
+    RANGE := (0 .. 1) ;
+    TERM соотвествует := LINEAR (0, 0) (1, 1) ;
+END_DEFUZZIFY
+DEFUZZIFY Охл_зоны_спекания
+    METHOD: LM ;
+    UNITS: "ст. прин." ;
+    RANGE := (0 .. 1) ;
+    TERM соотвествует := LINEAR (0, 0) (1, 1) ;
+END_DEFUZZIFY
+DEFUZZIFY Нагрев_зоны_спекания
+    METHOD: LM ;
+    UNITS: "ст. прин." ;
+    RANGE := (0 .. 1) ;
+    TERM соотвествует := LINEAR (0, 0) (1, 1) ;
+END_DEFUZZIFY
+
+RULEBLOCK Класс1
+    OPERATION_BASE : MAXMIN , 29 ; 
+    RULE rp_0_0 : IF (i_0 IS Z) AND (i_1 IS Z) AND (i_2 IS Z) AND (i_3 IS LN) AND (i_4 IS LN) AND (i_5 IS LN) AND (i_6 IS LN) AND (i_7 IS Z) AND (i_8 IS P) AND (i_9 IS LP) AND (i_10 IS Z) AND (no_0 IS Z) AND (no_1 IS Z) AND (no_2 IS Z) AND (no_3 IS Z) AND (no_4 IS Z) AND (no_5 IS Z) AND (no_6 IS LN) AND (no_7 IS LN) AND (no_8 IS N) AND (no_9 IS N) AND (no_10 IS N) THEN Обр_колец_в_зоне_спек IS соотвествует WITH 1 ;
+    RULE rp_1_0 : IF (i_0 IS Z) AND (i_1 IS LN) AND (i_2 IS LN) AND (i_3 IS LN) AND (i_4 IS LN) AND (i_5 IS LN) AND (i_6 IS Z) AND (i_7 IS LP) AND (i_8 IS LP) AND (i_9 IS LP) AND (i_10 IS N) AND (no_0 IS Z) AND (no_1 IS LN) AND (no_2 IS N) AND (no_3 IS N) AND (no_4 IS N) AND (no_5 IS N) AND (no_6 IS N) AND (no_7 IS N) AND (no_8 IS N) AND (no_9 IS LN) AND (no_10 IS LN) THEN Обр_колец_в_зоне_спек IS соотвествует WITH 1 ;
+    RULE rp_2_0 : IF (i_0 IS Z) AND (i_1 IS Z) AND (i_2 IS LN) AND (i_3 IS LN) AND (i_4 IS Z) AND (i_5 IS P) AND (i_6 IS P) AND (i_7 IS HP) AND (i_8 IS LP) AND (i_9 IS Z) AND (i_10 IS LN) AND (no_0 IS Z) AND (no_1 IS Z) AND (no_2 IS LN) AND (no_3 IS LN) AND (no_4 IS LN) AND (no_5 IS LN) AND (no_6 IS LN) AND (no_7 IS N) AND (no_8 IS N) AND (no_9 IS N) AND (no_10 IS N) THEN Обр_колец_в_зоне_спек IS соотвествует WITH 1 ;
+    RULE rp_3_0 : IF (i_0 IS Z) AND (i_1 IS Z) AND (i_2 IS LN) AND (i_3 IS LN) AND (i_4 IS LN) AND (i_5 IS LN) AND (i_6 IS Z) AND (i_7 IS LP) AND (i_8 IS P) AND (i_9 IS P) AND (i_10 IS P) AND (no_0 IS Z) AND (no_1 IS LN) AND (no_2 IS LN) AND (no_3 IS LN) AND (no_4 IS N) AND (no_5 IS HN) AND (no_6 IS HN) AND (no_7 IS HN) AND (no_8 IS HN) AND (no_9 IS HN) AND (no_10 IS HN) THEN Обр_колец_в_зоне_спек IS соотвествует WITH 1 ;
+    RULE rp_4_0 : IF (i_0 IS Z) AND (i_1 IS Z) AND (i_2 IS LN) AND (i_3 IS LN) AND (i_4 IS P) AND (i_5 IS LP) AND (i_6 IS LP) AND (i_7 IS LP) AND (i_8 IS Z) AND (i_9 IS Z) AND (i_10 IS LN) AND (no_0 IS Z) AND (no_1 IS Z) AND (no_2 IS LN) AND (no_3 IS Z) AND (no_4 IS LN) AND (no_5 IS N) AND (no_6 IS N) AND (no_7 IS HN) AND (no_8 IS HN) AND (no_9 IS HN) AND (no_10 IS HN) THEN Обр_колец_в_зоне_спек IS соотвествует WITH 1 ;
+    RULE rp_5_0 : IF (i_0 IS Z) AND (i_1 IS Z) AND (i_2 IS LN) AND (i_3 IS N) AND (i_4 IS N) AND (i_5 IS N) AND (i_6 IS N) AND (i_7 IS LN) AND (i_8 IS P) AND (i_9 IS HP) AND (i_10 IS HP) AND (no_0 IS Z) AND (no_1 IS Z) AND (no_2 IS LN) AND (no_3 IS LN) AND (no_4 IS LN) AND (no_5 IS N) AND (no_6 IS LN) AND (no_7 IS HN) AND (no_8 IS HN) AND (no_9 IS HN) AND (no_10 IS HN) THEN Обр_колец_в_зоне_спек IS соотвествует WITH 1 ;
+    RULE rp_6_0 : IF (i_0 IS Z) AND (i_1 IS Z) AND (i_2 IS LN) AND (i_3 IS N) AND (i_4 IS N) AND (i_5 IS N) AND (i_6 IS Z) AND (i_7 IS P) AND (i_8 IS HP) AND (i_9 IS P) AND (i_10 IS LP) AND (no_0 IS Z) AND (no_1 IS Z) AND (no_2 IS Z) AND (no_3 IS Z) AND (no_4 IS Z) AND (no_5 IS LP) AND (no_6 IS Z) AND (no_7 IS N) AND (no_8 IS N) AND (no_9 IS N) AND (no_10 IS HN) THEN Обр_колец_в_зоне_спек IS соотвествует WITH 1 ;
+    RULE rp_7_0 : IF (i_0 IS Z) AND (i_1 IS Z) AND (i_2 IS Z) AND (i_3 IS LN) AND (i_4 IS LN) AND (i_5 IS LN) AND (i_6 IS LN) AND (i_7 IS Z) AND (i_8 IS P) AND (i_9 IS LP) AND (i_10 IS Z) AND (no_0 IS Z) AND (no_1 IS Z) AND (no_2 IS Z) AND (no_3 IS LN) AND (no_4 IS LN) AND (no_5 IS N) AND (no_6 IS N) AND (no_7 IS N) AND (no_8 IS N) AND (no_9 IS HN) AND (no_10 IS HN) THEN Обр_колец_в_зоне_спек IS соотвествует WITH 1 ;
+    RULE rp_8_0 : IF (i_0 IS Z) AND (i_1 IS N) AND (i_2 IS N) AND (i_3 IS LN) AND (i_4 IS P) AND (i_5 IS P) AND (i_6 IS P) AND (i_7 IS P) AND (i_8 IS LP) AND (i_9 IS LP) AND (i_10 IS LP) AND (no_0 IS Z) AND (no_1 IS Z) AND (no_2 IS LN) AND (no_3 IS N) AND (no_4 IS HN) AND (no_5 IS HN) AND (no_6 IS HN) AND (no_7 IS HN) AND (no_8 IS HN) AND (no_9 IS HN) AND (no_10 IS HN) THEN Обр_колец_в_зоне_спек IS соотвествует WITH 1 ;
+    RULE rp_9_1 : IF (i_0 IS Z) AND (i_1 IS LP) AND (i_2 IS LP) AND (i_3 IS LP) AND (i_4 IS LP) AND (i_5 IS LP) AND (i_6 IS HP) AND (i_7 IS HP) AND (i_8 IS HP) AND (i_9 IS P) AND (i_10 IS P) AND (no_0 IS Z) AND (no_1 IS Z) AND (no_2 IS Z) AND (no_3 IS LN) AND (no_4 IS Z) AND (no_5 IS LN) AND (no_6 IS LN) AND (no_7 IS LN) AND (no_8 IS LN) AND (no_9 IS Z) AND (no_10 IS LN) THEN Обр_колец_перед_з_спек IS соотвествует WITH 1 ;
+    RULE rp_10_1 : IF (i_0 IS Z) AND (i_1 IS Z) AND (i_2 IS Z) AND (i_3 IS LP) AND (i_4 IS HP) AND (i_5 IS HP) AND (i_6 IS HP) AND (i_7 IS HP) AND (i_8 IS HP) AND (i_9 IS HP) AND (i_10 IS P) AND (no_0 IS Z) AND (no_1 IS Z) AND (no_2 IS Z) AND (no_3 IS Z) AND (no_4 IS Z) AND (no_5 IS LN) AND (no_6 IS LN) AND (no_7 IS LN) AND (no_8 IS N) AND (no_9 IS N) AND (no_10 IS N) THEN Обр_колец_перед_з_спек IS соотвествует WITH 1 ;
+    RULE rp_11_1 : IF (i_0 IS Z) AND (i_1 IS LP) AND (i_2 IS P) AND (i_3 IS P) AND (i_4 IS P) AND (i_5 IS P) AND (i_6 IS P) AND (i_7 IS P) AND (i_8 IS P) AND (i_9 IS LP) AND (i_10 IS P) AND (no_0 IS Z) AND (no_1 IS LN) AND (no_2 IS LN) AND (no_3 IS N) AND (no_4 IS Z) AND (no_5 IS LN) AND (no_6 IS LN) AND (no_7 IS LN) AND (no_8 IS LN) AND (no_9 IS N) AND (no_10 IS N) THEN Обр_колец_перед_з_спек IS соотвествует WITH 1 ;
+    RULE rp_12_1 : IF (i_0 IS Z) AND (i_1 IS Z) AND (i_2 IS Z) AND (i_3 IS LP) AND (i_4 IS HP) AND (i_5 IS P) AND (i_6 IS P) AND (i_7 IS P) AND (i_8 IS P) AND (i_9 IS LP) AND (i_10 IS Z) AND (no_0 IS Z) AND (no_1 IS LN) AND (no_2 IS LN) AND (no_3 IS N) AND (no_4 IS LN) AND (no_5 IS Z) AND (no_6 IS LN) AND (no_7 IS LN) AND (no_8 IS N) AND (no_9 IS N) AND (no_10 IS N) THEN Обр_колец_перед_з_спек IS соотвествует WITH 1 ;
+    RULE rp_13_1 : IF (i_0 IS Z) AND (i_1 IS Z) AND (i_2 IS Z) AND (i_3 IS Z) AND (i_4 IS Z) AND (i_5 IS LP) AND (i_6 IS LP) AND (i_7 IS LP) AND (i_8 IS P) AND (i_9 IS P) AND (i_10 IS LP) AND (no_0 IS Z) AND (no_1 IS Z) AND (no_2 IS Z) AND (no_3 IS Z) AND (no_4 IS Z) AND (no_5 IS Z) AND (no_6 IS Z) AND (no_7 IS Z) AND (no_8 IS Z) AND (no_9 IS LN) AND (no_10 IS LN) THEN Обр_колец_перед_з_спек IS соотвествует WITH 1 ;
+    RULE rp_14_1 : IF (i_0 IS Z) AND (i_1 IS Z) AND (i_2 IS Z) AND (i_3 IS Z) AND (i_4 IS Z) AND (i_5 IS Z) AND (i_6 IS Z) AND (i_7 IS Z) AND (i_8 IS LP) AND (i_9 IS LP) AND (i_10 IS LP) AND (no_0 IS Z) AND (no_1 IS Z) AND (no_2 IS Z) AND (no_3 IS Z) AND (no_4 IS Z) AND (no_5 IS Z) AND (no_6 IS Z) AND (no_7 IS Z) AND (no_8 IS Z) AND (no_9 IS Z) AND (no_10 IS Z) THEN Обр_колец_перед_з_спек IS соотвествует WITH 1 ;
+    RULE rp_15_2 : IF (i_0 IS Z) AND (i_1 IS Z) AND (i_2 IS Z) AND (i_3 IS LP) AND (i_4 IS LP) AND (i_5 IS LP) AND (i_6 IS LP) AND (i_7 IS LP) AND (i_8 IS LP) AND (i_9 IS LP) AND (i_10 IS P) AND (no_0 IS Z) AND (no_1 IS P) AND (no_2 IS P) AND (no_3 IS HP) AND (no_4 IS HP) AND (no_5 IS HP) AND (no_6 IS HP) AND (no_7 IS HP) AND (no_8 IS HP) AND (no_9 IS HP) AND (no_10 IS HP) THEN Охл_зоны_спекания IS соотвествует WITH 1 ;
+    RULE rp_16_2 : IF (i_0 IS Z) AND (i_1 IS Z) AND (i_2 IS Z) AND (i_3 IS LP) AND (i_4 IS LP) AND (i_5 IS LP) AND (i_6 IS LP) AND (i_7 IS LP) AND (i_8 IS P) AND (i_9 IS P) AND (i_10 IS P) AND (no_0 IS Z) AND (no_1 IS Z) AND (no_2 IS Z) AND (no_3 IS Z) AND (no_4 IS Z) AND (no_5 IS LP) AND (no_6 IS LP) AND (no_7 IS LP) AND (no_8 IS LP) AND (no_9 IS LP) AND (no_10 IS LP) THEN Охл_зоны_спекания IS соотвествует WITH 1 ;
+    RULE rp_17_2 : IF (i_0 IS Z) AND (i_1 IS Z) AND (i_2 IS Z) AND (i_3 IS LP) AND (i_4 IS LP) AND (i_5 IS LP) AND (i_6 IS LP) AND (i_7 IS LP) AND (i_8 IS LP) AND (i_9 IS LP) AND (i_10 IS LP) AND (no_0 IS Z) AND (no_1 IS Z) AND (no_2 IS Z) AND (no_3 IS Z) AND (no_4 IS Z) AND (no_5 IS Z) AND (no_6 IS LP) AND (no_7 IS LP) AND (no_8 IS LP) AND (no_9 IS LP) AND (no_10 IS LP) THEN Охл_зоны_спекания IS соотвествует WITH 1 ;
+    RULE rp_18_2 : IF (i_0 IS Z) AND (i_1 IS Z) AND (i_2 IS Z) AND (i_3 IS LP) AND (i_4 IS LP) AND (i_5 IS LP) AND (i_6 IS LP) AND (i_7 IS LP) AND (i_8 IS LP) AND (i_9 IS P) AND (i_10 IS P) AND (no_0 IS Z) AND (no_1 IS Z) AND (no_2 IS Z) AND (no_3 IS Z) AND (no_4 IS Z) AND (no_5 IS LP) AND (no_6 IS LP) AND (no_7 IS P) AND (no_8 IS P) AND (no_9 IS P) AND (no_10 IS HP) THEN Охл_зоны_спекания IS соотвествует WITH 1 ;
+    RULE rp_19_3 : IF (i_0 IS Z) AND (i_1 IS Z) AND (i_2 IS LN) AND (i_3 IS LN) AND (i_4 IS LN) AND (i_5 IS LN) AND (i_6 IS LN) AND (i_7 IS N) AND (i_8 IS N) AND (i_9 IS N) AND (i_10 IS N) AND (no_0 IS Z) AND (no_1 IS Z) AND (no_2 IS LN) AND (no_3 IS LN) AND (no_4 IS N) AND (no_5 IS N) AND (no_6 IS LN) AND (no_7 IS N) AND (no_8 IS N) AND (no_9 IS LN) AND (no_10 IS LN) THEN Нагрев_зоны_спекания IS соотвествует WITH 1 ;
+    RULE rp_20_3 : IF (i_0 IS Z) AND (i_1 IS LN) AND (i_2 IS LN) AND (i_3 IS LN) AND (i_4 IS LN) AND (i_5 IS LN) AND (i_6 IS LN) AND (i_7 IS LN) AND (i_8 IS LN) AND (i_9 IS N) AND (i_10 IS N) AND (no_0 IS Z) AND (no_1 IS LN) AND (no_2 IS LN) AND (no_3 IS N) AND (no_4 IS N) AND (no_5 IS N) AND (no_6 IS N) AND (no_7 IS N) AND (no_8 IS N) AND (no_9 IS N) AND (no_10 IS N) THEN Нагрев_зоны_спекания IS соотвествует WITH 1 ;
+    RULE rp_21_3 : IF (i_0 IS Z) AND (i_1 IS Z) AND (i_2 IS LN) AND (i_3 IS LN) AND (i_4 IS LN) AND (i_5 IS LN) AND (i_6 IS LN) AND (i_7 IS LN) AND (i_8 IS LN) AND (i_9 IS LN) AND (i_10 IS LN) AND (no_0 IS Z) AND (no_1 IS LN) AND (no_2 IS LN) AND (no_3 IS LN) AND (no_4 IS N) AND (no_5 IS N) AND (no_6 IS N) AND (no_7 IS N) AND (no_8 IS N) AND (no_9 IS N) AND (no_10 IS N) THEN Нагрев_зоны_спекания IS соотвествует WITH 1 ;
+    RULE rp_22_3 : IF (i_0 IS Z) AND (i_1 IS Z) AND (i_2 IS Z) AND (i_3 IS LN) AND (i_4 IS LN) AND (i_5 IS LN) AND (i_6 IS LN) AND (i_7 IS N) AND (i_8 IS N) AND (i_9 IS N) AND (i_10 IS N) AND (no_0 IS Z) AND (no_1 IS Z) AND (no_2 IS Z) AND (no_3 IS Z) AND (no_4 IS LN) AND (no_5 IS LN) AND (no_6 IS LN) AND (no_7 IS LN) AND (no_8 IS LN) AND (no_9 IS LN) AND (no_10 IS LN) THEN Нагрев_зоны_спекания IS соотвествует WITH 1 ;
+    RULE rp_23_3 : IF (i_0 IS Z) AND (i_1 IS Z) AND (i_2 IS LN) AND (i_3 IS LN) AND (i_4 IS LN) AND (i_5 IS LN) AND (i_6 IS LN) AND (i_7 IS LN) AND (i_8 IS LN) AND (i_9 IS LN) AND (i_10 IS LN) AND (no_0 IS Z) AND (no_1 IS Z) AND (no_2 IS Z) AND (no_3 IS LN) AND (no_4 IS N) AND (no_5 IS N) AND (no_6 IS N) AND (no_7 IS N) AND (no_8 IS LN) AND (no_9 IS N) AND (no_10 IS N) THEN Нагрев_зоны_спекания IS соотвествует WITH 1 ;
+    RULE rp_24_3 : IF (i_0 IS Z) AND (i_1 IS Z) AND (i_2 IS Z) AND (i_3 IS Z) AND (i_4 IS Z) AND (i_5 IS LN) AND (i_6 IS LN) AND (i_7 IS LN) AND (i_8 IS LN) AND (i_9 IS LN) AND (i_10 IS LN) AND (no_0 IS Z) AND (no_1 IS LN) AND (no_2 IS LN) AND (no_3 IS LN) AND (no_4 IS LN) AND (no_5 IS LN) AND (no_6 IS LN) AND (no_7 IS LN) AND (no_8 IS LN) AND (no_9 IS LN) AND (no_10 IS LN) THEN Нагрев_зоны_спекания IS соотвествует WITH 1 ;
+END_RULEBLOCK
+
+END_FUNCTION_BLOCK
