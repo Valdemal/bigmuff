@@ -1,15 +1,16 @@
 from typing import Optional, List
 
-from .custom import TCustomVariable
-from ..consts import Crisp, Natural
+from .custom import CustomVariable
+from ..consts import Crisp
 from ..enums import FuzzifyMethod, DefuzzifyMethod, ValueType, OperationCode
-from ..exceptions import ELingVariable, NFE_INVALID_BASE, NFE_INVALID_INDEX, NFE_INVALID_BASE_SET
+from ..fuzzification import SingletonFuzzification
 from ..fuzzy_set import TFuzzySet
 from ..member_func import RESULT_FUNC
+from ..mixins import OperationBased
 from ..operation import OperationBase
 
 
-class TLingVariable(TCustomVariable):
+class LingVariable(CustomVariable, OperationBased):
     """
     Лингвистическая переменная
     """
@@ -29,17 +30,11 @@ class TLingVariable(TCustomVariable):
             a_fmethod: метод фаззификации
             a_dfmethod: метод дефаззификации
         """
-        if a_fmethod is not None and a_dfmethod is not None:
-            super().__init__(name, a_fmethod, a_dfmethod)
-        else:
-            super().__init__(name)
+        if a_fmethod is None:
+            a_fmethod = SingletonFuzzification(a_inf, a_sup)
 
-        if a_inf >= a_sup:
-            raise ELingVariable("", NFE_INVALID_BASE)
-
-        self._inf_base = a_inf
-        self._sup_base = a_sup
-        self._operation = a_ops
+        CustomVariable.__init__(self, name,a_inf, a_sup, a_fmethod, a_dfmethod)
+        OperationBased.__init__(self, a_ops)
         self._terms: List[TFuzzySet] = []
         self.value_type = ValueType.valLinguistic
 
@@ -47,116 +42,23 @@ class TLingVariable(TCustomVariable):
     def terms(self) -> List[TFuzzySet]:
         return self._terms
 
-    @property
-    def ops(self) -> Optional[OperationBase]:
-        return self._operation
 
-    @ops.setter
-    def ops(self, value: OperationBase):
+    def _set_ops(self, value):
+        super()._set_ops(value)
         for t in self._terms:
             t.ops = value
-        self._operation = value
 
-    @property
-    def inf(self) -> Crisp:
-        """Получить нижнюю границу"""
-        return self._inf_base
-
-    @inf.setter
-    def inf(self, value: Crisp):
-        """Установить нижнюю границу"""
-        if value >= self._sup_base:
-            raise ELingVariable("", NFE_INVALID_BASE)
-
-        self._inf_base = value
+    def _set_inf(self, value):
+        super()._set_inf(value)
         for t in self._terms:
             t.func.inf = value
 
-    @property
-    def sup(self) -> Crisp:
-        """Получить верхнюю границу"""
-        return self._sup_base
-
-    @sup.setter
-    def sup(self, value: Crisp):
-        """Установить верхнюю границу"""
-        if self._inf_base >= value:
-            raise ELingVariable("", NFE_INVALID_BASE)
-
-        self._sup_base = value
+    def _set_sup(self, value):
+        super()._set_sup(value)
         for t in self._terms:
             t.func.sup = value
 
-    def set_term(self, index: Natural, value: TFuzzySet):
-        """
-        Установить терм по индексу
-
-        Args:
-            index: индекс терма
-            value: новое значение терма
-        """
-        if index < len(self._terms):
-            self._terms[index] = value
-            value.ops = self._operation
-        else:
-            raise ELingVariable("", NFE_INVALID_INDEX)
-
-    def add_term(self, fv: TFuzzySet):
-        """
-        Добавить терм
-
-        Args:
-            fv: терм для добавления
-        """
-        if (fv.func.inf != self._inf_base) or (fv.func.sup != self._sup_base):
-            raise ELingVariable("", NFE_INVALID_BASE_SET)
-
-        self._terms.append(fv)
-        fv.ops = self._operation
-
-    def del_term(self, index: Natural):
-        """
-        Удалить терм по индексу
-
-        Args:
-            index: индекс удаляемого терма
-        """
-        if index < len(self._terms):
-            del self._terms[index]
-        else:
-            raise ELingVariable("", NFE_INVALID_INDEX)
-
-    def sort_terms(self):
-        """
-        Упорядочивание термов по центру площади (COA)
-        """
-        n = len(self._terms)
-        for i in range(n - 2, -1, -1):
-            swapped = False
-            for j in range(i + 1):
-                coa_j = self._terms[j].func.coa(self._terms[j].ops.points)
-                coa_j1 = self._terms[j + 1].func.coa(self._terms[j + 1].ops.points)
-
-                if coa_j > coa_j1:
-                    self._terms[j], self._terms[j + 1] = self._terms[j + 1], self._terms[j]
-                    swapped = True
-
-            if not swapped:
-                break
-
-    def _internal_fuzzificate(self, crisp: float) -> TFuzzySet:
-        """
-        Внутренняя фаззификация
-
-        Args:
-            crisp: четкое значение
-
-        Returns:
-            нечеткое множество
-        """
-        return self._terms[0].fuzzificate(crisp, self._fuzzify)
-
-    def _internal_defuzzificate(self, value: Optional[TFuzzySet]) -> float:
+    def defuzzificate(self, value: TFuzzySet) -> Crisp:
         """
         Внутренняя дефаззификация
 

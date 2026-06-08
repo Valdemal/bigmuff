@@ -2,11 +2,11 @@ from typing import List
 
 from kernel.enums import OperationCode
 from kernel.fuzzy_set import TFuzzySet
-from kernel.variables.custom import TCustomVariable
+from kernel.variables.custom import CustomVariable
 
 
 class EvaluatedVar:
-    def __init__(self, var: TCustomVariable, value: List[int]):
+    def __init__(self, var: CustomVariable, value: List[int]):
         """
         Args:
             var: переменная
@@ -22,7 +22,7 @@ class EvaluatedVar:
         return self._fuzzy
 
     @property
-    def var(self) -> TCustomVariable:
+    def var(self) -> CustomVariable:
         return self._var
 
     @property

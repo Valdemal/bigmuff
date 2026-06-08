@@ -1,19 +1,19 @@
 from abc import ABC, abstractmethod
 from typing import Optional, List
 
-from kernel.mixins import Named
-from kernel.enums import FuzzifyMethod, DefuzzifyMethod, ValueType, VariableType
-from kernel.exceptions import EFuzzyVariable, NFE_INVALID_FUZZIFY_METHOD, NFE_INVALID_DEFUZZIFY_METHOD
+from kernel.consts import Crisp
+from kernel.enums import DefuzzifyMethod, ValueType, VariableType
+from kernel.fuzzification import FuzzificationMethod
 from kernel.fuzzy_set import TFuzzySet
-from kernel.operation import OperationBase
+from kernel.mixins import Named, OperationBased, RangeDefined
 
 
-class TCustomVariable(Named, ABC):
+class CustomVariable(Named, OperationBased, RangeDefined, ABC):
     """
     Базовый класс для нечеткой переменной
     """
 
-    def __init__(self, name: str, a_fmethod: Optional[FuzzifyMethod] = FuzzifyMethod.fmNA,
+    def __init__(self, name: str, inf: Crisp, sup: Crisp,a_fmethod: Optional[FuzzificationMethod] = None,
                  a_dfmethod: Optional[DefuzzifyMethod] = DefuzzifyMethod.dmNA):
         """
         Конструктор базового класса переменной
@@ -24,6 +24,7 @@ class TCustomVariable(Named, ABC):
             a_dfmethod: метод дефаззификации
         """
         super().__init__(name=name)
+        RangeDefined.__init__(self, inf, sup)
         self._value_type = ValueType.valNA
         self._type = VariableType.vtNA
         self._units = ""
@@ -32,14 +33,6 @@ class TCustomVariable(Named, ABC):
 
     @abstractmethod
     def value(self, revform: List[int]) -> TFuzzySet:
-        pass
-
-    @property
-    def ops(self) -> Optional[OperationBase]:
-        return None
-
-    @ops.setter
-    def ops(self, value: OperationBase):
         pass
 
     @abstractmethod
@@ -71,12 +64,12 @@ class TCustomVariable(Named, ABC):
         self._type = value
 
     @property
-    def fuzzify(self) -> FuzzifyMethod:
+    def fuzzify(self) -> FuzzificationMethod:
         """Получить метод фаззификации"""
         return self._fuzzify
 
     @fuzzify.setter
-    def fuzzify(self, value: FuzzifyMethod):
+    def fuzzify(self, value: FuzzificationMethod):
         self._fuzzify = value
 
     @property
@@ -98,7 +91,7 @@ class TCustomVariable(Named, ABC):
         """Установить единицы измерения"""
         self._units = value
 
-    def fuzzificate(self, crisp: float) -> Optional['TFuzzySet']:
+    def fuzzificate(self, crisp: Crisp) -> TFuzzySet:
         """
         Процедура фаззификации
 
@@ -108,41 +101,15 @@ class TCustomVariable(Named, ABC):
         Returns:
             нечеткое множество
         """
-        if self._fuzzify == FuzzifyMethod.fmNA:
-            raise EFuzzyVariable(self._name, NFE_INVALID_FUZZIFY_METHOD)
-        return self._internal_fuzzificate(crisp)
+        if self._fuzzify is None:
+            raise Exception()
 
-    def defuzzificate(self, value: Optional['TFuzzySet']) -> float:
+        return TFuzzySet(f"Fuzzy {crisp}", self._fuzzify(crisp, self), ops=self.ops)
+
+    @abstractmethod
+    def defuzzificate(self, value: TFuzzySet) -> Crisp:
         """
         Процедура дефаззификации
-
-        Args:
-            value: нечеткое множество
-
-        Returns:
-            четкое значение
-        """
-        if self._defuzzify == DefuzzifyMethod.dmNA:
-            raise EFuzzyVariable(self._name, NFE_INVALID_DEFUZZIFY_METHOD)
-        return self._internal_defuzzificate(value)
-
-    @abstractmethod
-    def _internal_fuzzificate(self, crisp: float) -> Optional['TFuzzySet']:
-        """
-        Внутренняя фаззификация (должен быть переопределен)
-
-        Args:
-            crisp: четкое значение
-
-        Returns:
-            нечеткое множество
-        """
-        pass
-
-    @abstractmethod
-    def _internal_defuzzificate(self, value: Optional['TFuzzySet']) -> float:
-        """
-        Внутренняя дефаззификация (должен быть переопределен)
 
         Args:
             value: нечеткое множество

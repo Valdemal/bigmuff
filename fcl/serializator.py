@@ -4,12 +4,14 @@ from fcl.consts import VARIABLE_VAL_TYPE_NAME, FUZZIFY_METHOD_NAME, MEMBER_FUNC_
 
 from kernel.blocks import RuleBlock, FunctionalBlock
 from kernel.enums import OperationCode
+from kernel.fuzzification import FuzzificationMethod, TriangularFuzzification, TrapezoidFuzzification, \
+    SingletonFuzzification, GaussFuzzification
 from kernel.fuzzy_set import TFuzzySet
 from kernel.member_func import TMemberFunc
 from kernel.rules import CompositeRule
-from kernel.variables.custom import TCustomVariable
-from kernel.variables.fuzzy import TFuzzyVariable
-from kernel.variables.ling import TLingVariable
+from kernel.variables.custom import CustomVariable
+from kernel.variables.fuzzy import FuzzyVariable
+from kernel.variables.ling import LingVariable
 
 
 def to_fcl(func_block: FunctionalBlock) -> str:
@@ -28,34 +30,45 @@ END_VAR
 END_FUNCTION_BLOCK
     """
 
-def var_to_fcl(var: TCustomVariable) -> str:
+def var_to_fcl(var: CustomVariable) -> str:
     return f"\t{var.name} : {VARIABLE_VAL_TYPE_NAME[var.value_type.value]};"
 
 
-def var_full_to_fcl(var: TCustomVariable) -> str:
+def var_full_to_fcl(var: CustomVariable) -> str:
     res = ""
     if var.units:
         res += f"""UNITS: "{var.units}";\n"""
 
-    if isinstance(var, TFuzzyVariable):
+    if isinstance(var, FuzzyVariable):
         res += f"\tRANGE := ({var.fuzzy_set.func.inf} .. {var.fuzzy_set.func.sup})\n;\t"
         res += fuzzy_set_to_fcl(var.fuzzy_set)
 
-    elif isinstance(var, TLingVariable):
+    elif isinstance(var, LingVariable):
         res += f"\tRANGE := ({var.inf} .. {var.sup})\n\t"
         res += '\t'.join(fuzzy_set_to_fcl(term) for term in var.terms)
 
     return res
 
+def get_fuzzification_method_name(method: FuzzificationMethod):
+    if isinstance(method, TriangularFuzzification):
+        return "TRI"
+    elif isinstance(method, TrapezoidFuzzification):
+        return "TRAP"
+    elif isinstance(method, SingletonFuzzification):
+        return "SINGLETON"
+    elif isinstance(method, GaussFuzzification):
+        return "GAUSS"
 
-def fuzzify_to_fcl(var: TCustomVariable) -> str:
+    return "NULL"
+
+def fuzzify_to_fcl(var: CustomVariable) -> str:
     return f"""FUZZIFY {var.name}
-    METHOD: {FUZZIFY_METHOD_NAME[var.fuzzify.value]};
+    METHOD: {get_fuzzification_method_name(var.fuzzify)};
     {var_full_to_fcl(var)}END_FUZZIFY    
     """
 
 
-def defuzzify_to_fcl(var: TCustomVariable) -> str:
+def defuzzify_to_fcl(var: CustomVariable) -> str:
     return f"""DEFUZZIFY {var.name}
     METHOD: {DEFUZZIFY_METHOD_NAME[var.defuzzify.value]};
     {var_full_to_fcl(var)}END_DEFUZZIFY 

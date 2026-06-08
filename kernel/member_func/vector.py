@@ -1,5 +1,3 @@
-from typing import Optional
-
 from kernel.comparison import eq
 from kernel.consts import Crisp, Natural, Membership
 from kernel.enums import MemberFuncType
@@ -42,9 +40,9 @@ class TMemberFuncLnVect(TMemberFunc):
         i = self._get_index(value)
 
 
-        step = (self._sup_base - self._inf_base) / (len(self._data) - 1)
-        x1 = self._inf_base + i * step
-        x2 = self._inf_base + (i + 1) * step
+        step = (self.sup - self.inf) / (len(self._data) - 1)
+        x1 = self.inf + i * step
+        x2 = self.inf + (i + 1) * step
 
         y1 = self._data[i]
         if eq(value, x1):

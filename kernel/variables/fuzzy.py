@@ -4,14 +4,14 @@
 
 from typing import Optional, List
 
-from .custom import TCustomVariable
+from .custom import CustomVariable
 from ..enums import FuzzifyMethod, DefuzzifyMethod, ValueType, OperationCode, VariableType
 from ..fuzzy_set import TFuzzySet
 from ..member_func import RESULT_FUNC
 from ..operation import OperationBase
 
 
-class TFuzzyVariable(TCustomVariable):
+class FuzzyVariable(CustomVariable):
     """
     Нечеткая переменная (с одним нечетким множеством)
     """
@@ -76,7 +76,7 @@ class TFuzzyVariable(TCustomVariable):
         if self._fs:
             self._fs.name = "Value"
 
-    def _internal_fuzzificate(self, crisp: float) -> Optional[TFuzzySet]:
+    def fuzzificate(self, crisp: float) -> Optional[TFuzzySet]:
         """
         Внутренняя фаззификация
 
@@ -88,7 +88,7 @@ class TFuzzyVariable(TCustomVariable):
         """
         return self._fs.fuzzificate(crisp, self._fuzzify)
 
-    def _internal_defuzzificate(self, value: Optional[TFuzzySet]) -> float:
+    def defuzzificate(self, value: Optional[TFuzzySet]) -> float:
         """
         Внутренняя дефаззификация
 

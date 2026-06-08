@@ -4,13 +4,14 @@ from kernel.blocks import FunctionalBlock, RuleBlock
 from kernel.consts import Crisp
 from kernel.containers.evaluatedvar import EvaluatedVar
 from kernel.enums import VariableType, ValueType, FuzzifyMethod, DefuzzifyMethod, MemberFuncType
+from kernel.fuzzification import FuzzificationMethod
 from kernel.fuzzy_set import TFuzzySet
 from kernel.member_func import TMemberFunc, TMemberFuncSingle, TMemberFuncLinear, \
     TMemberFuncLnVect, GaussianMemberFunc
 from kernel.node_value import TNodeValue
 from kernel.operation import obMaxMin, OperationBase
 from kernel.rules import CompositeRule
-from kernel.variables.custom import TCustomVariable
+from kernel.variables.custom import CustomVariable
 
 
 class Builder:
@@ -23,14 +24,14 @@ class Builder:
 
         # рассматриваемая переменная
         # todo сократить до одного свойства current_var
-        self._current_var: TCustomVariable | None = None
+        self._current_var: CustomVariable | None = None
         self.var_type: VariableType | None = None
         self.var_value_type: ValueType | None = None
-        self._fuzzify_method: FuzzifyMethod | None = None
+        self._fuzzify_method: FuzzificationMethod | None = None
         self._defuzzify_method: DefuzzifyMethod | None = None
         self._units: str = ""
         self.infinum: Crisp = 0
-        self.supremum: Crisp = 0
+        self.supremum: Crisp = 1
         self._learning = False
 
         # рассматриваемая функция принадлежности
@@ -79,7 +80,7 @@ class Builder:
             case ValueType.valFuzzy:
                 self.current_var.fuzzy_set = self._current_set
             case ValueType.valLinguistic:
-                self.current_var.add_term(self._current_set)
+                self.current_var.terms.append(self._current_set)
 
     @property
     def oper_base(self):
@@ -132,7 +133,7 @@ class Builder:
     def set_var_value_type(self, value_type: ValueType):
         self.var_value_type = value_type
 
-    def set_fuzzify_method(self, fuzzify_method: FuzzifyMethod):
+    def set_fuzzify_method(self, fuzzify_method: FuzzificationMethod):
         self._fuzzify_method = fuzzify_method
 
     def set_units(self, units: str):
@@ -149,16 +150,18 @@ class Builder:
 
     def set_infinum(self):
         self.infinum = self.numeric_literal
+        self.fuzzify_method.inf = self.infinum
 
     def set_supremum(self):
         self.supremum = self.numeric_literal
+        self.fuzzify_method.sup = self.supremum
 
     @property
     def current_var(self):
         return self._current_var
 
     @current_var.setter
-    def current_var(self, value: TCustomVariable):
+    def current_var(self, value: CustomVariable):
         self._current_var = value
 
     @property

@@ -2,12 +2,14 @@ from builder import Builder
 from fcl.enums import FCLTokens
 from fcl.structs import FCLElement
 from kernel.enums import VariableType, ValueType, FuzzifyMethod, MemberFuncType, DefuzzifyMethod, OperationCode
+from kernel.fuzzification import TriangularFuzzification, TrapezoidFuzzification, SingletonFuzzification, \
+    GaussFuzzification
 from kernel.fuzzy_set import TFuzzySet
 from kernel.member_func import TMemberFuncLinear
 from kernel.operation import obMaxMin, obSumProd, obLukasiewicz, obKDLogic, obZ2Logic, obZ3Logic
-from kernel.variables.custom import TCustomVariable
-from kernel.variables.fuzzy import TFuzzyVariable
-from kernel.variables.ling import TLingVariable
+from kernel.variables.custom import CustomVariable
+from kernel.variables.fuzzy import FuzzyVariable
+from kernel.variables.ling import LingVariable
 
 
 def set_var_type(element: FCLElement, builder: Builder):
@@ -29,10 +31,10 @@ def create_variable(element: FCLElement, builder: Builder):
         case ValueType.valNA:
             raise Exception("Variable type is not valid")
         case ValueType.valFuzzy:
-            v = TFuzzyVariable(builder.identifier,
-                               TFuzzySet("", TMemberFuncLinear(float('-inf'), float('inf')), obMaxMin))
+            v = FuzzyVariable(builder.identifier,
+                              TFuzzySet("", TMemberFuncLinear(float('-inf'), float('inf')), obMaxMin))
         case ValueType.valLinguistic:
-            v = TLingVariable(builder.identifier, float('-inf'), float('inf'), obMaxMin)
+            v = LingVariable(builder.identifier, float('-inf'), float('inf'), obMaxMin)
 
     match builder.var_type:
         case VariableType.vtInput:
@@ -76,15 +78,24 @@ def end_function_block():
 def set_fuzzify_method(element: FCLElement, builder: Builder):
     match element.id:
         case FCLTokens.null:
-            builder.set_fuzzify_method(FuzzifyMethod.fmNA)
+            pass
+            # builder.set_fuzzify_method(FuzzifyMethod.fmNA)
         case FCLTokens.tri:
-            builder.set_fuzzify_method(FuzzifyMethod.fmTriangle)
+            builder.set_fuzzify_method(
+                TriangularFuzzification()
+            )
         case FCLTokens.trap:
-            builder.set_fuzzify_method(FuzzifyMethod.fmTrapezoid)
+            builder.set_fuzzify_method(
+                TrapezoidFuzzification()
+            )
         case FCLTokens.singleton:
-            builder.set_fuzzify_method(FuzzifyMethod.fmSingleton)
+            builder.set_fuzzify_method(
+                SingletonFuzzification()
+            )
         case FCLTokens.gauss:
-            builder.set_fuzzify_method(FuzzifyMethod.fmSmoothTrap)
+            builder.set_fuzzify_method(
+                GaussFuzzification()
+            )
 
 
 def null_units(element: FCLElement, builder: Builder):

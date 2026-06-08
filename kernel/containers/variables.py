@@ -1,24 +1,24 @@
 from typing import Iterable, List
 
 from kernel.containers.mediator import NeuroFuzzyComponent, NeuroFuzzyMediator
-from kernel.variables.custom import TCustomVariable
+from kernel.variables.custom import CustomVariable
 
 
 class VarContainer(NeuroFuzzyComponent):
-    def __init__(self, variables: Iterable[TCustomVariable]=None, mediator: NeuroFuzzyMediator = None):
+    def __init__(self, variables: Iterable[CustomVariable]=None, mediator: NeuroFuzzyMediator = None):
         super().__init__(mediator)
         if variables is None:
             variables = []
-        self._variables: List[TCustomVariable] = list(variables)
+        self._variables: List[CustomVariable] = list(variables)
 
-    def append(self, variable: TCustomVariable):
+    def append(self, variable: CustomVariable):
         self._variables.append(variable)
 
         if self._mediator is not None:
             self._mediator.notify(self, 'append', len(self._variables) - 1)
 
 
-    def pop(self, index: int) -> TCustomVariable:
+    def pop(self, index: int) -> CustomVariable:
         if self._mediator is not None:
             self._mediator.notify(self, 'pop', index)
 
@@ -31,7 +31,7 @@ class VarContainer(NeuroFuzzyComponent):
 
         return -1
 
-    def __getitem__(self, index) -> TCustomVariable:
+    def __getitem__(self, index) -> CustomVariable:
         return self._variables[index]
 
     def __iter__(self):

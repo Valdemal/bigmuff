@@ -233,23 +233,23 @@ class TFuzzySet(Named, OperationBased, Learnable):
             новое нечеткое множество
         """
         # todo выделить метод фаззификации в отдельный класс
-        delta = (self._fn.sup - self._fn.inf) * DELTA_AMOUNT / 2.0
-        crdel = (self._fn.sup - self._fn.inf) * CRISP_AMOUNT / 2.0
+        delta = (self.func.sup - self.func.inf) * DELTA_AMOUNT / 2.0
+        crdel = (self.func.sup - self.func.inf) * CRISP_AMOUNT / 2.0
 
         if fuzzify == FuzzifyMethod.fmTriangle:
-            p1 = max(self._fn.inf, crisp - delta)
-            p2 = min(self._fn.sup, crisp + delta)
-            result = TMemberFuncTriangular(p1, crisp, p2, 1.0, self._fn.inf, self._fn.sup)
+            p1 = max(self.func.inf, crisp - delta)
+            p2 = min(self.func.sup, crisp + delta)
+            result = TMemberFuncTriangular(p1, crisp, p2, 1.0, self.func.inf, self.func.sup)
 
         elif fuzzify == FuzzifyMethod.fmTrapezoid:
-            p1 = max(self._fn.inf, crisp - delta - crdel)
-            p2 = max(self._fn.inf, crisp - crdel)
-            p3 = min(self._fn.sup, crisp + crdel)
-            p4 = min(self._fn.sup, crisp + crdel + delta)
-            result = TMemberFuncTrapezoidal(p1, p2, p3, p4, 1.0, self._fn.inf, self._fn.sup)
+            p1 = max(self.func.inf, crisp - delta - crdel)
+            p2 = max(self.func.inf, crisp - crdel)
+            p3 = min(self.func.sup, crisp + crdel)
+            p4 = min(self.func.sup, crisp + crdel + delta)
+            result = TMemberFuncTrapezoidal(p1, p2, p3, p4, 1.0, self.func.inf, self.func.sup)
 
         elif fuzzify == FuzzifyMethod.fmSingleton:
-            result = TMemberFuncSingle(crisp, 1.0, self._fn.inf, self._fn.sup)
+            result = TMemberFuncSingle(crisp, 1.0, self.func.inf, self.func.sup)
 
         # elif fuzzify == FuzzifyMethod.fmSmoothTri:
         #     p1 = max(self._fn.inf, crisp - delta)
@@ -266,7 +266,7 @@ class TFuzzySet(Named, OperationBased, Learnable):
         else:
             raise ValueError(f"Unknown fuzzify method: {fuzzify}")
 
-        return TFuzzySet(self._name, result, self._ops)
+        return TFuzzySet(self.name, result, self.ops)
 
     def defuzzificate(self, defuzzify: DefuzzifyMethod) -> float:
         """
@@ -279,15 +279,15 @@ class TFuzzySet(Named, OperationBased, Learnable):
             четкое значение
         """
         if defuzzify == DefuzzifyMethod.dmCOG:
-            return self._fn.cog(self._ops.points)
+            return self._fn.cog(self.ops.points)
         elif defuzzify == DefuzzifyMethod.dmCOA:
-            return self._fn.coa(self._ops.points)
+            return self._fn.coa(self.ops.points)
         elif defuzzify == DefuzzifyMethod.dmLM:
-            return self._fn.lm(self._ops.points)
+            return self._fn.lm(self.ops.points)
         elif defuzzify == DefuzzifyMethod.dmRM:
-            return self._fn.rm(self._ops.points)
+            return self._fn.rm(self.ops.points)
         elif defuzzify == DefuzzifyMethod.dmMOM:
-            return self._fn.mom(self._ops.points)
+            return self._fn.mom(self.ops.points)
         else:
             raise ValueError(f"Unknown defuzzify method: {defuzzify}")
 

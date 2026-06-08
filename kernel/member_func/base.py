@@ -1,13 +1,14 @@
 from abc import abstractmethod, ABC
 from typing import List
 
-from kernel.comparison import inrange, gt, eq, ls, ge
+from kernel.comparison import inrange, gt, eq, ls
 from kernel.consts import Crisp, Membership, Natural
 from kernel.enums import MemberFuncType
-from kernel.exceptions import EMemberFunc, NFE_INVALID_BASE, NFE_INVALID_INDEX, NFE_OUT_OF_DOMAIN
+from kernel.exceptions import EMemberFunc, NFE_INVALID_INDEX, NFE_OUT_OF_DOMAIN
+from kernel.mixins import RangeDefined
 
 
-class TMemberFunc(ABC):
+class TMemberFunc(ABC, RangeDefined):
     """
     Виртуальный базовый класс функции принадлежности
     """
@@ -20,41 +21,17 @@ class TMemberFunc(ABC):
             a_inf: нижняя граница базового множества
             a_sup: верхняя граница базового множества
         """
-        if ge(a_inf, a_sup):
-            raise EMemberFunc("", NFE_INVALID_BASE)
-
-        self._inf_base = a_inf
-        self._sup_base = a_sup
+        RangeDefined.__init__(self, a_inf, a_sup)
         self._type = MemberFuncType.mfNA
         self._nodes: List['TNodeValue'] = []
         self._data: List[Membership] = []
 
-    @property
-    def inf(self) -> Crisp:
-        """Получить нижнюю границу базового множества"""
-        return self._inf_base
-
-    @inf.setter
-    def inf(self, value: Crisp):
-        """Установить нижнюю границу базового множества"""
-        if ge(value, self._sup_base):
-            raise EMemberFunc("", NFE_INVALID_BASE)
-
-        self._inf_base = value
+    def _set_inf(self, value):
+        super()._set_inf(value)
         self._adjust_nodes()
 
-    @property
-    def sup(self) -> Crisp:
-        """Получить верхнюю границу базового множества"""
-        return self._sup_base
-
-    @sup.setter
-    def sup(self, value: Crisp):
-        """Установить верхнюю границу базового множества"""
-        if ge(self._inf_base, value):
-            raise EMemberFunc("", NFE_INVALID_BASE)
-
-        self._sup_base = value
+    def _set_sup(self, value):
+        super()._set_sup(value)
         self._adjust_nodes()
 
     @property
@@ -114,7 +91,7 @@ class TMemberFunc(ABC):
         Returns:
             степень принадлежности
         """
-        if not inrange(value, self._inf_base, self._sup_base):
+        if not inrange(value, self.inf, self.sup):
             raise EMemberFunc("", NFE_OUT_OF_DOMAIN)
 
         return self._get_value(value)
@@ -126,7 +103,7 @@ class TMemberFunc(ABC):
         Args:
             value: добавляемая точка
         """
-        if not inrange(value.x, self._inf_base, self._sup_base):
+        if not inrange(value.x, self.inf, self.sup):
             raise EMemberFunc("", NFE_OUT_OF_DOMAIN)
 
         last = len(self._nodes) - 1
@@ -151,7 +128,7 @@ class TMemberFunc(ABC):
         Args:
             value: добавляемая точка
         """
-        if not inrange(value.x, self._inf_base, self._sup_base):
+        if not inrange(value.x, self.inf, self.sup):
             raise EMemberFunc("", NFE_OUT_OF_DOMAIN)
 
         self._nodes.append(value)
@@ -180,16 +157,16 @@ class TMemberFunc(ABC):
             индекс в векторе
         """
         return int(
-            (value - self._inf_base) * (len(self._data) - 1) / (self._sup_base - self._inf_base)
+            (value - self.inf) * (len(self._data) - 1) / (self.sup - self.inf)
         )
 
     def _adjust_nodes(self):
         """Привести узловые точки в соответствие с границами"""
         for i in range(len(self._nodes)):
-            if gt(self._nodes[i].x, self._sup_base):
-                self._nodes[i].x = self._sup_base
-            elif ls(self._nodes[i].x, self._inf_base):
-                self._nodes[i].x = self._inf_base
+            if gt(self._nodes[i].x, self.sup):
+                self._nodes[i].x = self.sup
+            elif ls(self._nodes[i].x, self.inf):
+                self._nodes[i].x = self.inf
 
     @abstractmethod
     def _get_value(self, value: Crisp) -> Membership:
@@ -214,8 +191,8 @@ class TMemberFunc(ABC):
         Returns:
             четкое значение
         """
-        x = self._inf_base
-        step = (self._sup_base - self._inf_base) / (points - 1)
+        x = self.inf
+        step = (self.sup - self.inf) / (points - 1)
         sum_xm = 0.0
         sum_m = 0.0
 
@@ -226,7 +203,7 @@ class TMemberFunc(ABC):
             x += step
 
         if eq(sum_m, 0):
-            return (self._sup_base - self._inf_base) / 2.0
+            return (self.sup - self.inf) / 2.0
         else:
             return sum_xm / sum_m
 
@@ -240,8 +217,8 @@ class TMemberFunc(ABC):
         Returns:
             четкое значение
         """
-        x = self._inf_base
-        step = (self._sup_base - self._inf_base) / (points - 1)
+        x = self.inf
+        step = (self.sup - self.inf) / (points - 1)
         total_sum = 0.0
         half_sum = 0.0
 
@@ -250,7 +227,7 @@ class TMemberFunc(ABC):
             x += step
 
         total_sum /= 2.0
-        x = self._inf_base
+        x = self.inf
         i = 0
 
         while i < points and ls(half_sum, total_sum):
@@ -259,7 +236,7 @@ class TMemberFunc(ABC):
             i += 1
 
         if eq(half_sum, 0) or eq(total_sum, 0):
-            return (self._sup_base - self._inf_base) / 2.0
+            return (self.sup - self.inf) / 2.0
         else:
             return x - step
 
@@ -273,10 +250,10 @@ class TMemberFunc(ABC):
         Returns:
             четкое значение
         """
-        x = self._inf_base
-        step = (self._sup_base - self._inf_base) / (points - 1)
+        x = self.inf
+        step = (self.sup - self.inf) / (points - 1)
         max_val = 0.0
-        x_max = self._inf_base
+        x_max = self.inf
 
         for _ in range(points):
             mi = self(x)
@@ -297,10 +274,10 @@ class TMemberFunc(ABC):
         Returns:
             четкое значение
         """
-        x = self._sup_base
-        step = (self._sup_base - self._inf_base) / (points - 1)
+        x = self.sup
+        step = (self.sup - self.inf) / (points - 1)
         max_val = 0.0
-        x_max = self._sup_base
+        x_max = self.sup
 
         for _ in range(points):
             mi = self(x)
@@ -321,11 +298,11 @@ class TMemberFunc(ABC):
         Returns:
             четкое значение
         """
-        x = self._inf_base
-        step = (self._sup_base - self._inf_base) / (points - 1)
+        x = self.inf
+        step = (self.sup - self.inf) / (points - 1)
         max_val = 0.0
-        x_start = self._inf_base
-        x_end = self._inf_base
+        x_start = self.inf
+        x_end = self.inf
 
         for _ in range(points):
             mi = self(x)
