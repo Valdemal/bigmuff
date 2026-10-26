@@ -1,5 +1,6 @@
 from typing import List
 
+
 from fcl.consts import VARIABLE_VAL_TYPE_NAME, FUZZIFY_METHOD_NAME, MEMBER_FUNC_TYPE_NAME, DEFUZZIFY_METHOD_NAME
 
 from kernel.blocks import RuleBlock, FunctionalBlock
@@ -7,7 +8,7 @@ from kernel.enums import OperationCode
 from kernel.fuzzification import FuzzificationMethod, TriangularFuzzification, TrapezoidFuzzification, \
     SingletonFuzzification, GaussFuzzification
 from kernel.fuzzy_set import TFuzzySet
-from kernel.member_func import TMemberFunc
+from kernel.member_func import TMemberFunc, GaussianMemberFunc
 from kernel.rules import CompositeRule
 from kernel.variables.custom import CustomVariable
 from kernel.variables.fuzzy import FuzzyVariable
@@ -76,21 +77,24 @@ def defuzzify_to_fcl(var: CustomVariable) -> str:
 
 
 def member_func_to_fcl(func: TMemberFunc):
-    result = f"{MEMBER_FUNC_TYPE_NAME[func.type.value]} "
+    if isinstance(func, GaussianMemberFunc):
+        result = f'GAUSS({func.mean}, {func.dev}) '
+    else:
+        result = f"{MEMBER_FUNC_TYPE_NAME[func.type.value]} "
 
-    if func.is_nodes():
-        for i in range(len(func.nodes)):
-            result += str(func.nodes[i]) + " "
-    elif func.is_vector():
-        x = func.inf
-        if len(func.data) > 1:
-            step = (func.sup - func.inf) / (len(func.data) - 1)
-        else:
-            step = 0
+        if func.is_nodes():
+            for i in range(len(func.nodes)):
+                result += str(func.nodes[i]) + " "
+        elif func.is_vector():
+            x = func.inf
+            if len(func.data) > 1:
+                step = (func.sup - func.inf) / (len(func.data) - 1)
+            else:
+                step = 0
 
-        for d in func.data:
-            result += f"({x}, {d}) "
-            x += step
+            for d in func.data:
+                result += f"({x}, {d}) "
+                x += step
 
     return result
 
